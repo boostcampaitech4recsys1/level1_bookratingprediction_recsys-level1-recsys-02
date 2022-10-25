@@ -1,5 +1,5 @@
 ### Dataset
-baseline_code/data/
+main_code/data/
 ​
 # macOS + Windows
 .DS_Store
@@ -84,4 +84,4 @@ venv.bak/
 .idea/
 
 # Submit
-baseline_code/submit
+main_code/submit
