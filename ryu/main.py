@@ -43,11 +43,11 @@ def main(args):
         data = dl_data_split(args, data)
         data = dl_data_loader(args, data)
 
-    elif args.MODEL=='CNN_FM':
+    elif args.MODEL == 'CNN_FM':
         data = image_data_split(args, data)
         data = image_data_loader(args, data)
 
-    elif args.MODEL=='DeepCoNN':
+    elif args.MODEL == 'DeepCoNN':
         data = text_data_split(args, data)
         data = text_data_loader(args, data)
     else:
@@ -55,19 +55,19 @@ def main(args):
 
     ######################## Model
     print(f'--------------- INIT {args.MODEL} ---------------')
-    if args.MODEL=='FM':
+    if args.MODEL == 'FM':
         model = FactorizationMachineModel(args, data)
-    elif args.MODEL=='FFM':
+    elif args.MODEL == 'FFM':
         model = FieldAwareFactorizationMachineModel(args, data)
-    elif args.MODEL=='NCF':
+    elif args.MODEL == 'NCF':
         model = NeuralCollaborativeFiltering(args, data)
-    elif args.MODEL=='WDN':
+    elif args.MODEL == 'WDN':
         model = WideAndDeepModel(args, data)
-    elif args.MODEL=='DCN':
+    elif args.MODEL == 'DCN':
         model = DeepCrossNetworkModel(args, data)
-    elif args.MODEL=='CNN_FM':
+    elif args.MODEL == 'CNN_FM':
         model = CNN_FM(args, data)
-    elif args.MODEL=='DeepCoNN':
+    elif args.MODEL == 'DeepCoNN':
         model = DeepCoNN(args, data)
     else:
         pass
@@ -80,10 +80,10 @@ def main(args):
     print(f'--------------- {args.MODEL} PREDICT ---------------')
     if args.MODEL in ('FM', 'FFM', 'NCF', 'WDN', 'DCN'):
         predicts = model.predict(data['test_dataloader'])
-    elif args.MODEL=='CNN_FM':
-        predicts  = model.predict(data['test_dataloader'])
-    elif args.MODEL=='DeepCoNN':
-        predicts  = model.predict(data['test_dataloader'])
+    elif args.MODEL == 'CNN_FM':
+        predicts = model.predict(data['test_dataloader'])
+    elif args.MODEL == 'DeepCoNN':
+        predicts = model.predict(data['test_dataloader'])
     else:
         pass
 
@@ -102,9 +102,7 @@ def main(args):
     submission.to_csv('submit/{}_{}.csv'.format(save_time, args.MODEL), index=False)
 
 
-
 if __name__ == "__main__":
-
     ######################## BASIC ENVIRONMENT SETUP
     parser = argparse.ArgumentParser(description='parser')
     arg = parser.add_argument
@@ -112,11 +110,11 @@ if __name__ == "__main__":
     ############### BASIC OPTION
     arg('--DATA_PATH', type=str, default='data/', help='Data path를 설정할 수 있습니다.')
     arg('--MODEL', type=str, choices=['FM', 'FFM', 'NCF', 'WDN', 'DCN', 'CNN_FM', 'DeepCoNN'],
-                                help='학습 및 예측할 모델을 선택할 수 있습니다.')
+        help='학습 및 예측할 모델을 선택할 수 있습니다.')
     arg('--DATA_SHUFFLE', type=bool, default=True, help='데이터 셔플 여부를 조정할 수 있습니다.')
-    arg('--TEST_SIZE', type=float, default=0.2, help='Train/Valid split 비율을 조정할 수 있습니다.')
+    arg('--TEST_SIZE', type=float, default=0.3, help='Train/Valid split 비율을 조정할 수 있습니다.')
     arg('--SEED', type=int, default=42, help='seed 값을 조정할 수 있습니다.')
-    
+
     ############### TRAINING OPTION
     arg('--BATCH_SIZE', type=int, default=1024, help='Batch size를 조정할 수 있습니다.')
     arg('--EPOCHS', type=int, default=10, help='Epoch 수를 조정할 수 있습니다.')
@@ -133,8 +131,8 @@ if __name__ == "__main__":
     arg('--FFM_EMBED_DIM', type=int, default=16, help='FFM에서 embedding시킬 차원을 조정할 수 있습니다.')
 
     ############### NCF
-    arg('--NCF_EMBED_DIM', type=int, default=16, help='NCF에서 embedding시킬 차원을 조정할 수 있습니다.')
-    arg('--NCF_MLP_DIMS', type=list, default=(16, 16), help='NCF에서 MLP Network의 차원을 조정할 수 있습니다.')
+    arg('--NCF_EMBED_DIM', type=int, default=256, help='NCF에서 embedding시킬 차원을 조정할 수 있습니다.')
+    arg('--NCF_MLP_DIMS', type=list, default=(256, 128, 128, 64), help='NCF에서 MLP Network의 차원을 조정할 수 있습니다.')
     arg('--NCF_DROPOUT', type=float, default=0.2, help='NCF에서 Dropout rate를 조정할 수 있습니다.')
 
     ############### WDN
@@ -153,7 +151,8 @@ if __name__ == "__main__":
     arg('--CNN_FM_LATENT_DIM', type=int, default=8, help='CNN_FM에서 user/item/image에 대한 latent 차원을 조정할 수 있습니다.')
 
     ############### DeepCoNN
-    arg('--DEEPCONN_VECTOR_CREATE', type=bool, default=False, help='DEEP_CONN에서 text vector 생성 여부를 조정할 수 있으며 최초 학습에만 True로 설정하여야합니다.')
+    arg('--DEEPCONN_VECTOR_CREATE', type=bool, default=False,
+        help='DEEP_CONN에서 text vector 생성 여부를 조정할 수 있으며 최초 학습에만 True로 설정하여야합니다.')
     arg('--DEEPCONN_EMBED_DIM', type=int, default=32, help='DEEP_CONN에서 user와 item에 대한 embedding시킬 차원을 조정할 수 있습니다.')
     arg('--DEEPCONN_LATENT_DIM', type=int, default=10, help='DEEP_CONN에서 user/item/image에 대한 latent 차원을 조정할 수 있습니다.')
     arg('--DEEPCONN_CONV_1D_OUT_DIM', type=int, default=50, help='DEEP_CONN에서 1D conv의 출력 크기를 조정할 수 있습니다.')
@@ -161,5 +160,6 @@ if __name__ == "__main__":
     arg('--DEEPCONN_WORD_DIM', type=int, default=768, help='DEEP_CONN에서 1D conv의 입력 크기를 조정할 수 있습니다.')
     arg('--DEEPCONN_OUT_DIM', type=int, default=32, help='DEEP_CONN에서 1D conv의 출력 크기를 조정할 수 있습니다.')
 
+    # arg("--SAVE_EVERY", type=int, default=5, help="submit파일을 생성하는 주기를 epoch단위로 정할 수 있습니다.")
     args = parser.parse_args()
     main(args)

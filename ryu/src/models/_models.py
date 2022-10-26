@@ -3,6 +3,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+
 def rmse(real: list, predict: list) -> float:
     pred = np.array(predict)
     return np.sqrt(np.mean((real-pred) ** 2))
@@ -68,6 +69,7 @@ class FeaturesEmbedding(nn.Module):
         x = x + x.new_tensor(self.offsets).unsqueeze(0)
         return self.embedding(x)
 
+
 class FeaturesLinear(nn.Module):
 
     def __init__(self, field_dims: np.ndarray, output_dim: int=1):
@@ -82,6 +84,7 @@ class FeaturesLinear(nn.Module):
         """
         x = x + x.new_tensor(self.offsets).unsqueeze(0)
         return torch.sum(self.fc(x), dim=1) + self.bias
+
 
 class _FactorizationMachineModel(nn.Module):
 
@@ -98,6 +101,7 @@ class _FactorizationMachineModel(nn.Module):
         x = self.linear(x) + self.fm(self.embedding(x))
         # return torch.sigmoid(x.squeeze(1))
         return x.squeeze(1)
+
 
 class FieldAwareFactorizationMachine(nn.Module):
 
@@ -124,6 +128,7 @@ class FieldAwareFactorizationMachine(nn.Module):
         ix = torch.stack(ix, dim=1)
         return ix
 
+
 class _FieldAwareFactorizationMachineModel(nn.Module):
 
     def __init__(self, field_dims: np.ndarray, embed_dim: int):
@@ -139,6 +144,7 @@ class _FieldAwareFactorizationMachineModel(nn.Module):
         x = self.linear(x) + ffm_term
         # return torch.sigmoid(x.squeeze(1))
         return x.squeeze(1)
+
 
 class MultiLayerPerceptron(nn.Module):
 
@@ -160,6 +166,7 @@ class MultiLayerPerceptron(nn.Module):
         :param x: Float tensor of size ``(batch_size, embed_dim)``
         """
         return self.mlp(x)
+
 
 class _NeuralCollaborativeFiltering(nn.Module):
 
@@ -183,7 +190,9 @@ class _NeuralCollaborativeFiltering(nn.Module):
         x = self.mlp(x.view(-1, self.embed_output_dim))
         x = torch.cat([gmf, x], dim=1)
         x = self.fc(x).squeeze(1)
+
         return x
+
 
 class _WideAndDeepModel(nn.Module):
 
@@ -201,6 +210,7 @@ class _WideAndDeepModel(nn.Module):
         embed_x = self.embedding(x)
         x = self.linear(x) + self.mlp(embed_x.view(-1, self.embed_output_dim))
         return x.squeeze(1)
+
 
 class CrossNetwork(nn.Module):
 
@@ -223,6 +233,7 @@ class CrossNetwork(nn.Module):
             xw = self.w[i](x)
             x = x0 * xw + self.b[i] + x
         return x
+
 
 class _DeepCrossNetworkModel(nn.Module):
     """

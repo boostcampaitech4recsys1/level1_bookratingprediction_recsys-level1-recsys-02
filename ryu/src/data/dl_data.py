@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader, Dataset
 
+
 def dl_data_load(args):
 
     ######################## DATA LOAD
@@ -17,11 +18,11 @@ def dl_data_load(args):
     ids = pd.concat([train['user_id'], sub['user_id']]).unique()
     isbns = pd.concat([train['isbn'], sub['isbn']]).unique()
 
-    idx2user = {idx:id for idx, id in enumerate(ids)}
-    idx2isbn = {idx:isbn for idx, isbn in enumerate(isbns)}
+    idx2user = {idx: id for idx, id in enumerate(ids)}
+    idx2isbn = {idx: isbn for idx, isbn in enumerate(isbns)}
 
-    user2idx = {id:idx for idx, id in idx2user.items()}
-    isbn2idx = {isbn:idx for idx, isbn in idx2isbn.items()}
+    user2idx = {id: idx for idx, id in idx2user.items()}
+    isbn2idx = {isbn: idx for idx, isbn in idx2isbn.items()}
 
     train['user_id'] = train['user_id'].map(user2idx)
     sub['user_id'] = sub['user_id'].map(user2idx)
@@ -34,20 +35,20 @@ def dl_data_load(args):
     field_dims = np.array([len(user2idx), len(isbn2idx)], dtype=np.uint32)
 
     data = {
-            'train':train,
-            'test':test.drop(['rating'], axis=1),
-            'field_dims':field_dims,
-            'users':users,
-            'books':books,
-            'sub':sub,
-            'idx2user':idx2user,
-            'idx2isbn':idx2isbn,
-            'user2idx':user2idx,
-            'isbn2idx':isbn2idx,
+            'train': train,
+            'test': test.drop(['rating'], axis=1),
+            'field_dims': field_dims,
+            'users': users,
+            'books': books,
+            'sub': sub,
+            'idx2user': idx2user,
+            'idx2isbn': idx2isbn,
+            'user2idx': user2idx,
+            'isbn2idx': isbn2idx,
             }
 
-
     return data
+
 
 def dl_data_split(args, data):
     X_train, X_valid, y_train, y_valid = train_test_split(
@@ -59,6 +60,7 @@ def dl_data_split(args, data):
                                                         )
     data['X_train'], data['X_valid'], data['y_train'], data['y_valid'] = X_train, X_valid, y_train, y_valid
     return data
+
 
 def dl_data_loader(args, data):
     train_dataset = TensorDataset(torch.LongTensor(data['X_train'].values), torch.LongTensor(data['y_train'].values))

@@ -9,6 +9,7 @@ import torch.optim as optim
 from ._models import _NeuralCollaborativeFiltering, _WideAndDeepModel, _DeepCrossNetworkModel
 from ._models import rmse, RMSELoss
 
+
 class NeuralCollaborativeFiltering:
 
     def __init__(self, args, data):
@@ -37,7 +38,6 @@ class NeuralCollaborativeFiltering:
                                                     embed_dim=self.embed_dim, mlp_dims=self.mlp_dims, dropout=self.dropout).to(self.device)
         self.optimizer = torch.optim.Adam(params=self.model.parameters(), lr=self.learning_rate, amsgrad=True, weight_decay=self.weight_decay)
 
-
     def train(self):
       # model: type, optimizer: torch.optim, train_dataloader: DataLoader, criterion: torch.nn, device: str, log_interval: int=100
         for epoch in range(self.epochs):
@@ -59,7 +59,6 @@ class NeuralCollaborativeFiltering:
             rmse_score = self.predict_train()
             print('epoch:', epoch, 'validation: rmse:', rmse_score)
 
-
     def predict_train(self):
         self.model.eval()
         targets, predicts = list(), list()
@@ -70,7 +69,6 @@ class NeuralCollaborativeFiltering:
                 targets.extend(target.tolist())
                 predicts.extend(y.tolist())
         return rmse(targets, predicts)
-
 
     def predict(self, dataloader):
         self.model.eval()
@@ -108,7 +106,6 @@ class WideAndDeepModel:
         self.model = _WideAndDeepModel(self.field_dims, self.embed_dim, mlp_dims=self.mlp_dims, dropout=self.dropout).to(self.device)
         self.optimizer = torch.optim.Adam(params=self.model.parameters(), lr=self.learning_rate, amsgrad=True, weight_decay=self.weight_decay)
 
-
     def train(self):
       # model: type, optimizer: torch.optim, train_dataloader: DataLoader, criterion: torch.nn, device: str, log_interval: int=100
         for epoch in range(self.epochs):
@@ -130,7 +127,6 @@ class WideAndDeepModel:
             rmse_score = self.predict_train()
             print('epoch:', epoch, 'validation: rmse:', rmse_score)
 
-
     def predict_train(self):
         self.model.eval()
         targets, predicts = list(), list()
@@ -141,7 +137,6 @@ class WideAndDeepModel:
                 targets.extend(target.tolist())
                 predicts.extend(y.tolist())
         return rmse(targets, predicts)
-
 
     def predict(self, dataloader):
         self.model.eval()
@@ -180,7 +175,6 @@ class DeepCrossNetworkModel:
         self.model = _DeepCrossNetworkModel(self.field_dims, self.embed_dim, num_layers=self.num_layers, mlp_dims=self.mlp_dims, dropout=self.dropout).to(self.device)
         self.optimizer = torch.optim.Adam(params=self.model.parameters(), lr=self.learning_rate, amsgrad=True, weight_decay=self.weight_decay)
 
-
     def train(self):
       # model: type, optimizer: torch.optim, train_dataloader: DataLoader, criterion: torch.nn, device: str, log_interval: int=100
         for epoch in range(self.epochs):
@@ -202,7 +196,6 @@ class DeepCrossNetworkModel:
             rmse_score = self.predict_train()
             print('epoch:', epoch, 'validation: rmse:', rmse_score)
 
-
     def predict_train(self):
         self.model.eval()
         targets, predicts = list(), list()
@@ -213,7 +206,6 @@ class DeepCrossNetworkModel:
                 targets.extend(target.tolist())
                 predicts.extend(y.tolist())
         return rmse(targets, predicts)
-
 
     def predict(self, dataloader):
         self.model.eval()

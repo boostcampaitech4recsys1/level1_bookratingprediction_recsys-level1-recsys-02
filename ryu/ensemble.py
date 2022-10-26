@@ -4,6 +4,7 @@ import numpy as np
 from src.ensembles.ensembles import Ensemble
 import argparse
 
+
 def main(args):
     file_list = sum(args.ENSEMBLE_FILES, [])
     
@@ -29,6 +30,7 @@ def main(args):
     files_title = '-'.join(file_list)
 
     output.to_csv(f'{args.RESULT_PATH}{files_title}-{strategy_title}.csv',index=False)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='parser')
