@@ -8,13 +8,16 @@ from torch.utils.data import DataLoader, Dataset
 from torch.autograd import Variable
 from tqdm import tqdm
 
+
 class Image_Dataset(Dataset):
     def __init__(self, user_isbn_vector, img_vector, label):
         self.user_isbn_vector = user_isbn_vector
         self.img_vector = img_vector
         self.label = label
+
     def __len__(self):
         return self.user_isbn_vector.shape[0]
+
     def __getitem__(self, i):
         return {
                 'user_isbn_vector' : torch.tensor(self.user_isbn_vector[i], dtype=torch.long),
@@ -35,7 +38,7 @@ def process_img_data(df, books, user2idx, isbn2idx, train=False):
     books_ = books.copy()
     books_['isbn'] = books_['isbn'].map(isbn2idx)
 
-    if train == True:
+    if train:
         df_ = df.copy()
     else:
         df_ = df.copy()
@@ -68,11 +71,11 @@ def image_data_load(args):
     ids = pd.concat([train['user_id'], sub['user_id']]).unique()
     isbns = pd.concat([train['isbn'], sub['isbn']]).unique()
 
-    idx2user = {idx:id for idx, id in enumerate(ids)}
-    idx2isbn = {idx:isbn for idx, isbn in enumerate(isbns)}
+    idx2user = {idx: id for idx, id in enumerate(ids)}
+    idx2isbn = {idx: isbn for idx, isbn in enumerate(isbns)}
 
-    user2idx = {id:idx for idx, id in idx2user.items()}
-    isbn2idx = {isbn:idx for idx, isbn in idx2isbn.items()}
+    user2idx = {id: idx for idx, id in idx2user.items()}
+    isbn2idx = {isbn: idx for idx, isbn in idx2isbn.items()}
 
     train['user_id'] = train['user_id'].map(user2idx)
     sub['user_id'] = sub['user_id'].map(user2idx)
@@ -84,17 +87,17 @@ def image_data_load(args):
     img_test = process_img_data(test, books, user2idx, isbn2idx, train=False)
 
     data = {
-            'train':train,
-            'test':test,
-            'users':users,
-            'books':books,
-            'sub':sub,
-            'idx2user':idx2user,
-            'idx2isbn':idx2isbn,
-            'user2idx':user2idx,
-            'isbn2idx':isbn2idx,
-            'img_train':img_train,
-            'img_test':img_test,
+            'train': train,
+            'test': test,
+            'users': users,
+            'books': books,
+            'sub': sub,
+            'idx2user': idx2user,
+            'idx2isbn': idx2isbn,
+            'user2idx': user2idx,
+            'isbn2idx': isbn2idx,
+            'img_train': img_train,
+            'img_test': img_test,
             }
 
     return data

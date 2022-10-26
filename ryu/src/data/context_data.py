@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader, Dataset
 
+
 def age_map(x: int) -> int:
     x = int(x)
     if x < 20:
@@ -19,6 +20,7 @@ def age_map(x: int) -> int:
         return 5
     else:
         return 6
+
 
 def process_context_data(users, books, ratings1, ratings2):
     users['location_city'] = users['location'].apply(lambda x: x.split(',')[0])
@@ -124,7 +126,6 @@ def context_data_load(args):
             'isbn2idx':isbn2idx,
             }
 
-
     return data
 
 
@@ -138,6 +139,7 @@ def context_data_split(args, data):
                                                         )
     data['X_train'], data['X_valid'], data['y_train'], data['y_valid'] = X_train, X_valid, y_train, y_valid
     return data
+
 
 def context_data_loader(args, data):
     train_dataset = TensorDataset(torch.LongTensor(data['X_train'].values), torch.LongTensor(data['y_train'].values))

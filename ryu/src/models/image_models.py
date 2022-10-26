@@ -23,7 +23,6 @@ class CNN_Base(nn.Module):
         x = x.view(-1, 12 * 4 * 4)
         return x
 
-
 class _CNN_FM(torch.nn.Module):
     def __init__(self, field_dims, embed_dim, latent_dim):
         super().__init__()
@@ -45,7 +44,6 @@ class _CNN_FM(torch.nn.Module):
         output = self.fm(feature_vector)
         return output.squeeze(1)
 
-
 class CNN_FM:
     def __init__(self, args, data):
         super().__init__()
@@ -61,7 +59,6 @@ class CNN_FM:
         self.criterion = RMSELoss()
         self.epochs = args.EPOCHS
         self.model_name = 'image_model'
-
 
     def train(self):
         minimum_loss = 999999999
@@ -107,7 +104,6 @@ class CNN_FM:
             else:
                 loss_list.append([epoch, total_loss/n, val_total_loss/val_n, 'None'])
             tk0.set_postfix(train_loss=total_loss/n, valid_loss=val_total_loss/val_n)
-
 
     def predict(self, test_data_loader):
         self.model.eval()

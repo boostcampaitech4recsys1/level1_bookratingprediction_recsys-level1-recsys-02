@@ -56,8 +56,6 @@ class FactorizationMachineModel:
             rmse_score = self.predict_train()
             print('epoch:', epoch, 'validation: rmse:', rmse_score)
 
-
-
     def predict_train(self):
         self.model.eval()
         targets, predicts = list(), list()
@@ -68,7 +66,6 @@ class FactorizationMachineModel:
                 targets.extend(target.tolist())
                 predicts.extend(y.tolist())
         return rmse(targets, predicts)
-
 
     def predict(self, dataloader):
         self.model.eval()
@@ -103,7 +100,6 @@ class FieldAwareFactorizationMachineModel:
         self.model = _FieldAwareFactorizationMachineModel(self.field_dims, self.embed_dim).to(self.device)
         self.optimizer = torch.optim.Adam(params=self.model.parameters(), lr=self.learning_rate, amsgrad=True, weight_decay=self.weight_decay)
 
-
     def train(self):
       # model: type, optimizer: torch.optim, train_dataloader: DataLoader, criterion: torch.nn, device: str, log_interval: int=100
         for epoch in range(self.epochs):
@@ -125,7 +121,6 @@ class FieldAwareFactorizationMachineModel:
             rmse_score = self.predict_train()
             print('epoch:', epoch, 'validation: rmse:', rmse_score)
 
-
     def predict_train(self):
         self.model.eval()
         targets, predicts = list(), list()
@@ -136,7 +131,6 @@ class FieldAwareFactorizationMachineModel:
                 targets.extend(target.tolist())
                 predicts.extend(y.tolist())
         return rmse(targets, predicts)
-
 
     def predict(self, dataloader):
         self.model.eval()

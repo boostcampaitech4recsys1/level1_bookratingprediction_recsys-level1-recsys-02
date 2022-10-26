@@ -50,6 +50,7 @@ class _DeepCoNN(nn.Module):
                                          input_dim=(conv_1d_out_dim * 2) + (embed_dim*len(field_dims)),
                                          latent_dim=latent_dim,
                                          )
+
     def forward(self, x):
         user_isbn_vector, user_text_vector, item_text_vector = x[0], x[1], x[2]
         user_isbn_feature = self.embedding(user_isbn_vector)
@@ -83,7 +84,6 @@ class DeepCoNN:
         self.criterion = RMSELoss()
         self.epochs = args.EPOCHS
         self.model_name = 'text_model'
-
 
     def train(self):
         minimum_loss = 999999999
@@ -129,7 +129,6 @@ class DeepCoNN:
             else:
                 loss_list.append([epoch, total_loss/n, val_total_loss/val_n, 'None'])
             tk0.set_postfix(train_loss=total_loss/n, valid_loss=val_total_loss/val_n)
-
 
     def predict(self, test_data_loader):
         self.model.eval()

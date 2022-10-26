@@ -43,7 +43,7 @@ def process_text_data(df, books, user2idx, isbn2idx, device, train=False, user_s
     books_ = books.copy()
     books_['isbn'] = books_['isbn'].map(isbn2idx)
 
-    if train == True:
+    if train:
         df_ = df.copy()
     else:
         df_ = df.copy()
@@ -73,7 +73,7 @@ def process_text_data(df, books, user2idx, isbn2idx, device, train=False, user_s
                                 ])
         if not os.path.exists('./data/text_vector'):
             os.makedirs('./data/text_vector')
-        if train == True:
+        if train:
             np.save('./data/text_vector/train_user_summary_merge_vector.npy', vector)
         else:
             np.save('./data/text_vector/test_user_summary_merge_vector.npy', vector)
@@ -93,14 +93,14 @@ def process_text_data(df, books, user2idx, isbn2idx, device, train=False, user_s
                                 ])
         if not os.path.exists('./data/text_vector'):
             os.makedirs('./data/text_vector')
-        if train == True:
+        if train:
             np.save('./data/text_vector/train_item_summary_vector.npy', vector)
         else:
             np.save('./data/text_vector/test_item_summary_vector.npy', vector)
     else:
         print('Check Vectorizer')
         print('Vector Load')
-        if train == True:
+        if train:
             user = np.load('data/text_vector/train_user_summary_merge_vector.npy', allow_pickle=True)
         else:
             user = np.load('data/text_vector/test_user_summary_merge_vector.npy', allow_pickle=True)
@@ -108,14 +108,13 @@ def process_text_data(df, books, user2idx, isbn2idx, device, train=False, user_s
         user_review_text_df.columns = ['user_id', 'user_summary_merge_vector']
         user_review_text_df['user_id'] = user_review_text_df['user_id'].astype('int')
 
-        if train == True:
+        if train:
             item = np.load('data/text_vector/train_item_summary_vector.npy', allow_pickle=True)
         else:
             item = np.load('data/text_vector/test_item_summary_vector.npy', allow_pickle=True)
         books_text_df = pd.DataFrame([item[0], item[1]]).T
         books_text_df.columns = ['isbn', 'item_summary_vector']
         books_text_df['isbn'] = books_text_df['isbn'].astype('int')
-
 
     df_ = pd.merge(df_, user_review_text_df, on='user_id', how='left')
     df_ = pd.merge(df_, books_text_df[['isbn', 'item_summary_vector']], on='isbn', how='left')
@@ -153,8 +152,8 @@ def text_data_load(args):
     ids = pd.concat([train['user_id'], sub['user_id']]).unique()
     isbns = pd.concat([train['isbn'], sub['isbn']]).unique()
 
-    idx2user = {idx:id for idx, id in enumerate(ids)}
-    idx2isbn = {idx:isbn for idx, isbn in enumerate(isbns)}
+    idx2user = {idx: id for idx, id in enumerate(ids)}
+    idx2isbn = {idx: isbn for idx, isbn in enumerate(isbns)}
 
     user2idx = {id:idx for idx, id in idx2user.items()}
     isbn2idx = {isbn:idx for idx, isbn in idx2isbn.items()}
@@ -169,17 +168,17 @@ def text_data_load(args):
     text_test = process_text_data(test, books, user2idx, isbn2idx, args.DEVICE, train=False, user_summary_merge_vector=args.DEEPCONN_VECTOR_CREATE, item_summary_vector=args.DEEPCONN_VECTOR_CREATE)
 
     data = {
-            'train':train,
-            'test':test,
-            'users':users,
-            'books':books,
-            'sub':sub,
-            'idx2user':idx2user,
-            'idx2isbn':idx2isbn,
-            'user2idx':user2idx,
-            'isbn2idx':isbn2idx,
-            'text_train':text_train,
-            'text_test':text_test,
+            'train': train,
+            'test': test,
+            'users': users,
+            'books': books,
+            'sub': sub,
+            'idx2user': idx2user,
+            'idx2isbn': idx2isbn,
+            'user2idx': user2idx,
+            'isbn2idx': isbn2idx,
+            'text_train': text_train,
+            'text_test': text_test,
             }
 
     return data
@@ -194,6 +193,7 @@ def text_data_split(args, data):
                                                         shuffle=True
                                                         )
     data['X_train'], data['X_valid'], data['y_train'], data['y_valid'] = X_train, X_valid, y_train, y_valid
+
     return data
 
 
@@ -216,7 +216,6 @@ def text_data_loader(args, data):
                                 data['text_test']['item_summary_vector'].values,
                                 data['text_test']['rating'].values
                                 )
-
 
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=args.BATCH_SIZE, num_workers=0, shuffle=True)
     valid_dataloader = torch.utils.data.DataLoader(valid_dataset, batch_size=args.BATCH_SIZE, num_workers=0, shuffle=True)
