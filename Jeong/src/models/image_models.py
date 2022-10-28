@@ -24,19 +24,19 @@ class CNN_Base(nn.Module):
             nn.MaxPool2d(kernel_size=3, stride=1, padding=1),
             # 8 8 12
             nn.Conv2d(12, 24, kernel_size=3, stride=2, padding=0),
-            nn.BatchNorm2d(12),
+            nn.BatchNorm2d(24),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=3, stride=1, padding=1),
             # 3 3 24
             nn.Conv2d(24, 40, kernel_size=3, stride=1, padding=0),
-            nn.BatchNorm2d(12),
+            nn.BatchNorm2d(40),
             nn.ReLU(),
             # 1 1 40
         )
 
     def forward(self, x):
         x = self.cnn_layer(x)
-        x = x.view(-1, 12 * 4 * 4)
+        x = x.view(-1, 40)
         return x
 
 
@@ -46,7 +46,7 @@ class _CNN_FM(torch.nn.Module):
         self.embedding = FeaturesEmbedding(field_dims, embed_dim)
         self.cnn = CNN_Base()
         self.fm = FactorizationMachine_v(
-            input_dim=(embed_dim * 2) + (12 * 4 * 4),
+            input_dim=(embed_dim * 2) + (40),
             latent_dim=latent_dim,
         )
 
@@ -82,6 +82,10 @@ class CNN_FM:
         self.criterion = RMSELoss()
         self.epochs = args.EPOCHS
         self.model_name = "image_model"
+        if args.CNN_FM_LOAD_MODEL:
+            self.model.load_state_dict(
+                torch.load("./models/{}.pt".format(self.model_name))
+            )
 
     def train(self):
         minimum_loss = 999999999
@@ -124,8 +128,6 @@ class CNN_FM:
                 y = self.model(fields)
                 loss = self.criterion(y, target.float())
                 self.model.zero_grad()
-                loss.backward()
-                self.optimizer.step()
                 val_total_loss += loss.item()
                 val_n += 1
             if minimum_loss > (val_total_loss / val_n):
