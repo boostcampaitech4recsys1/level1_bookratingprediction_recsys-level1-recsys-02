@@ -14,6 +14,12 @@ def dl_data_load(args):
     test = pd.read_csv(args.DATA_PATH + 'test_ratings.csv')
     sub = pd.read_csv(args.DATA_PATH + 'sample_submission.csv')
 
+    user_count = train.groupby('user_id').count()['isbn'].to_dict()
+    for i in range(len(train)):
+        train.at[i, 'count'] = user_count[train['user_id'][i]]
+    train = train[train['count']>1].reset_index(drop=True)
+    train = train.drop("count", axis=1)
+
     ids = pd.concat([train['user_id'], sub['user_id']]).unique()
     isbns = pd.concat([train['isbn'], sub['isbn']]).unique()
 
