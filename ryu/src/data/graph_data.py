@@ -176,9 +176,6 @@ class GraphDataset(object):
 
 
 def id_reset(train: pd.DataFrame, test: pd.DataFrame, sub:pd.DataFrame) -> dict:
-    # ids = pd.concat([train['user_id'], test["user_id"], sub['user_id']]).unique()
-    # isbns = pd.concat([train['isbn'], test["isbn"], sub['isbn']]).unique()
-
     train_idx2user = {idx: user_id for idx, user_id in enumerate(train["user_id"].unique())}
     train_idx2isbn = {idx: isbn for idx, isbn in enumerate(train["isbn"].unique())}
     train_user2idx = {user_id: idx for idx, user_id in train_idx2user.items()}
