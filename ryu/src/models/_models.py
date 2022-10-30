@@ -363,47 +363,35 @@ class _NGCF(nn.Module):
         i = positive item (user interacted with item)
         j = negative item (user did not interact with item)
         """
-        # apply drop-out mask
         L_plus_I_hat = self._droupout_sparse(self.L_plus_I) if self.node_dropout > 0 else self.L_plus_I
         L_hat = self._droupout_sparse(self.L) if self.node_dropout > 0 else self.L
 
-        # 논문 수식 (1)
         ego_embeddings = torch.cat([self.weight_dict['user_embedding'], self.weight_dict['item_embedding']], 0)
 
         final_embeddings = [ego_embeddings]
 
-        # forward pass for 'n' propagation layers
         for k in range(self.n_layers):
-            ########## Fill below ###########
-            # (L+I)E
-            side_L_plus_I_embeddings = torch.sparse.mm(L_plus_I_hat, ego_embeddings)  # FILL HERE #
+            side_L_plus_I_embeddings = torch.sparse.mm(L_plus_I_hat, ego_embeddings)
 
-            # (L+I)EW_1 + b_1
             simple_embeddings = torch.matmul(
                 side_L_plus_I_embeddings,
                 self.weight_dict['W_one_%d' % k]
-            ) + self.weight_dict['b_one_%d' % k]  # FILL HERE #
+            ) + self.weight_dict['b_one_%d' % k]
 
-            # LE
-            side_L_embeddings = torch.sparse.mm(L_hat, ego_embeddings)  # FILL HERE #
+            side_L_embeddings = torch.sparse.mm(L_hat, ego_embeddings)
 
-            # LEE
             interaction_embeddings = torch.mul(ego_embeddings, side_L_embeddings)
 
-            # LEEW_2 + b_2
             interaction_embeddings = torch.matmul(
                 interaction_embeddings,
                 self.weight_dict['W_two_%d' % k]
-            ) + self.weight_dict['b_two_%d' % k]  # FILL HERE #
+            ) + self.weight_dict['b_two_%d' % k]
 
-            # non-linear activation
-            ego_embeddings = F.leaky_relu(simple_embeddings + interaction_embeddings)  # FILL HERE #
+            ego_embeddings = F.leaky_relu(simple_embeddings + interaction_embeddings)
 
-            # add message dropout
             mess_dropout_mask = nn.Dropout(self.mess_dropout)
             ego_embeddings = mess_dropout_mask(ego_embeddings)
 
-            # Perform L2 normalization
             norm_embeddings = F.normalize(ego_embeddings, p=2, dim=1)
 
             final_embeddings.append(norm_embeddings)
@@ -412,8 +400,8 @@ class _NGCF(nn.Module):
 
         u_final_embeddings, i_final_embeddings = final_embeddings.split([self.n_users, self.n_items], 0)
 
-        self.u_final_embeddings = nn.Parameter(u_final_embeddings)
-        self.i_final_embeddings = nn.Parameter(i_final_embeddings)
+        u_final_embeddings = nn.Parameter(u_final_embeddings)
+        i_final_embeddings = nn.Parameter(i_final_embeddings)
 
         u_emb = u_final_embeddings[u]
         p_emb = i_final_embeddings[i]
