@@ -80,7 +80,12 @@ class FeaturesLinear(nn.Module):
         """
         :param x: Long tensor of size ``(batch_size, num_fields)``
         """
-        x = x + x.new_tensor(self.offsets).unsqueeze(0)
+        #print(self.offsets)
+        #print("off", self.offsets.shape)
+        kk = x.new_tensor(self.offsets).unsqueeze(0)
+        #print(kk.shape)
+        #print(x.shape)
+        x = x + kk
         return torch.sum(self.fc(x), dim=1) + self.bias
 
 class _FactorizationMachineModel(nn.Module):
@@ -95,7 +100,10 @@ class _FactorizationMachineModel(nn.Module):
         """
         :param x: Long tensor of size ``(batch_size, num_fields)``
         """
+        #print(x)
+        #print(x.shape)
         x = self.linear(x) + self.fm(self.embedding(x))
+        #print("newx", x.shape)
         # return torch.sigmoid(x.squeeze(1))
         return x.squeeze(1)
 
