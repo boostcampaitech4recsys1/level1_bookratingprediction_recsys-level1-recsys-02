@@ -3,8 +3,6 @@ import tqdm
 import numpy as np
 
 import torch
-import torch.nn as nn
-import torch.optim as optim
 
 from ._models import _NeuralCollaborativeFiltering, _WideAndDeepModel, _DeepCrossNetworkModel
 from ._models import rmse, RMSELoss
@@ -216,3 +214,5 @@ class DeepCrossNetworkModel:
                 y = self.model(fields)
                 predicts.extend(y.tolist())
         return predicts
+
+

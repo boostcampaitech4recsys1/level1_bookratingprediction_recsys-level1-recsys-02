@@ -8,11 +8,13 @@ from src.data import context_data_load, context_data_split, context_data_loader
 from src.data import dl_data_load, dl_data_split, dl_data_loader
 from src.data import image_data_load, image_data_split, image_data_loader
 from src.data import text_data_load, text_data_split, text_data_loader
+from src.data import GraphDataset, id_reset
 
 from src import FactorizationMachineModel, FieldAwareFactorizationMachineModel
 from src import NeuralCollaborativeFiltering, WideAndDeepModel, DeepCrossNetworkModel
 from src import CNN_FM
 from src import DeepCoNN
+from src import NGCF
 
 
 def main(args):
@@ -30,6 +32,8 @@ def main(args):
         import nltk
         nltk.download('punkt')
         data = text_data_load(args)
+    elif args.MODEL == "NGCF":
+        data = GraphDataset(args)
     else:
         pass
 
@@ -69,6 +73,8 @@ def main(args):
         model = CNN_FM(args, data)
     elif args.MODEL == 'DeepCoNN':
         model = DeepCoNN(args, data)
+    elif args.MODEL == "NGCF":
+        model = NGCF(args, data)
     else:
         pass
 
@@ -79,7 +85,7 @@ def main(args):
     ######################## INFERENCE
     print(f'--------------- {args.MODEL} PREDICT ---------------')
     if args.MODEL in ('FM', 'FFM', 'NCF', 'WDN', 'DCN'):
-        predicts = model.predict(data['test_dataloader'])
+        predicts = model.predict(data['sub_dataloader'])
     elif args.MODEL == 'CNN_FM':
         predicts = model.predict(data['test_dataloader'])
     elif args.MODEL == 'DeepCoNN':
@@ -116,9 +122,9 @@ if __name__ == "__main__":
     arg('--SEED', type=int, default=42, help='seed 값을 조정할 수 있습니다.')
 
     ############### TRAINING OPTION
-    arg('--BATCH_SIZE', type=int, default=1024, help='Batch size를 조정할 수 있습니다.')
-    arg('--EPOCHS', type=int, default=10, help='Epoch 수를 조정할 수 있습니다.')
-    arg('--LR', type=float, default=1e-3, help='Learning Rate를 조정할 수 있습니다.')
+    arg('--BATCH_SIZE', type=int, default=256, help='Batch size를 조정할 수 있습니다.')
+    arg('--EPOCHS', type=int, default=20, help='Epoch 수를 조정할 수 있습니다.')
+    arg('--LR', type=float, default=1e-4, help='Learning Rate를 조정할 수 있습니다.')
     arg('--WEIGHT_DECAY', type=float, default=1e-6, help='Adam optimizer에서 정규화에 사용하는 값을 조정할 수 있습니다.')
 
     ############### GPU
@@ -131,9 +137,9 @@ if __name__ == "__main__":
     arg('--FFM_EMBED_DIM', type=int, default=16, help='FFM에서 embedding시킬 차원을 조정할 수 있습니다.')
 
     ############### NCF
-    arg('--NCF_EMBED_DIM', type=int, default=256, help='NCF에서 embedding시킬 차원을 조정할 수 있습니다.')
-    arg('--NCF_MLP_DIMS', type=list, default=(256, 128, 128, 64), help='NCF에서 MLP Network의 차원을 조정할 수 있습니다.')
-    arg('--NCF_DROPOUT', type=float, default=0.2, help='NCF에서 Dropout rate를 조정할 수 있습니다.')
+    arg('--NCF_EMBED_DIM', type=int, default=64, help='NCF에서 embedding시킬 차원을 조정할 수 있습니다.')
+    arg('--NCF_MLP_DIMS', type=list, default=(64, 64), help='NCF에서 MLP Network의 차원을 조정할 수 있습니다.')
+    arg('--NCF_DROPOUT', type=float, default=0.1, help='NCF에서 Dropout rate를 조정할 수 있습니다.')
 
     ############### WDN
     arg('--WDN_EMBED_DIM', type=int, default=16, help='WDN에서 embedding시킬 차원을 조정할 수 있습니다.')
@@ -159,6 +165,16 @@ if __name__ == "__main__":
     arg('--DEEPCONN_KERNEL_SIZE', type=int, default=3, help='DEEP_CONN에서 1D conv의 kernel 크기를 조정할 수 있습니다.')
     arg('--DEEPCONN_WORD_DIM', type=int, default=768, help='DEEP_CONN에서 1D conv의 입력 크기를 조정할 수 있습니다.')
     arg('--DEEPCONN_OUT_DIM', type=int, default=32, help='DEEP_CONN에서 1D conv의 출력 크기를 조정할 수 있습니다.')
+
+    ############### NGCF
+    arg("--NGCF_REG", type=float, default=1e-5)
+    arg("--NGCF_EMBED_DIM", type=int, default=64)
+    arg("--NGCF_LAYERS", type=list, default=(64, 64))
+    arg("--NGCF_NODE_DROPOUT", type=float, default=0.1)
+    arg("--NGCF_MESS_DROPOUT", type=float, default=0.1)
+    arg("--NGCF_NDCG_K", type=int, default=20)
+    arg("--NGCF_EVAL_N", type=int, default=1)
+    arg("--NGCF_SAVE_EVERY", type=int, default=5)
 
     # arg("--SAVE_EVERY", type=int, default=5, help="submit파일을 생성하는 주기를 epoch단위로 정할 수 있습니다.")
     args = parser.parse_args()

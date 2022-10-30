@@ -40,7 +40,7 @@ def dl_data_load(args):
             'field_dims': field_dims,
             'users': users,
             'books': books,
-            'sub': sub,
+            'sub': sub.drop(["rating"], axis=1),
             'idx2user': idx2user,
             'idx2isbn': idx2isbn,
             'user2idx': user2idx,
@@ -66,11 +66,14 @@ def dl_data_loader(args, data):
     train_dataset = TensorDataset(torch.LongTensor(data['X_train'].values), torch.LongTensor(data['y_train'].values))
     valid_dataset = TensorDataset(torch.LongTensor(data['X_valid'].values), torch.LongTensor(data['y_valid'].values))
     test_dataset = TensorDataset(torch.LongTensor(data['test'].values))
+    sub_dataset = TensorDataset(torch.LongTensor(data["sub"].values))
 
     train_dataloader = DataLoader(train_dataset, batch_size=args.BATCH_SIZE, shuffle=args.DATA_SHUFFLE)
     valid_dataloader = DataLoader(valid_dataset, batch_size=args.BATCH_SIZE, shuffle=args.DATA_SHUFFLE)
     test_dataloader = DataLoader(test_dataset, batch_size=args.BATCH_SIZE, shuffle=False)
+    sub_dataloader = DataLoader(sub_dataset, batch_size=args.BATCH_SIZE, shuffle=False)
 
     data['train_dataloader'], data['valid_dataloader'], data['test_dataloader'] = train_dataloader, valid_dataloader, test_dataloader
+    data["sub_dataloader"] = sub_dataloader
 
     return data

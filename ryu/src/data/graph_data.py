@@ -3,7 +3,6 @@ import random
 import pandas as pd
 import numpy as np
 import scipy.sparse as sp
-from torch.utils.data import DataLoader, Dataset
 
 
 class GraphDataset(object):
@@ -17,11 +16,10 @@ class GraphDataset(object):
 
     def __init__(
             self,
-            base_path: str,
             args, # argparse
     ) -> None:
         super(GraphDataset, self).__init__()
-        self.base_path = base_path
+        self.base_path = args.DATA_PATH
         self.batch_size = args.batch_size
 
         self.n_users, self.n_items = 0, 0
@@ -163,7 +161,7 @@ class GraphDataset(object):
             return neg_items
 
         def sample_neg_items_for_u_from_pools(user_id, num):
-            neg_items = list(set(self.neg_pools[user_id]) - set(self.train_items[user_id))
+            neg_items = list(set(self.neg_pools[user_id]) - set(self.train_items[user_id]))
             return random.sample(neg_items, num)
 
         pos_items, neg_items = [], []
