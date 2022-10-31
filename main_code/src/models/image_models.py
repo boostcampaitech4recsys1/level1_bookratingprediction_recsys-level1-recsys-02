@@ -78,9 +78,9 @@ class CNN_FM:
                     fields, target = [data['user_isbn_vector'].to(self.device), data['img_vector'].to(self.device)], data['label'].to(self.device)
                 y = self.model(fields)
                 loss = self.criterion(y, target.float())
-                self.model.zero_grad()
-                loss.backward()
-                self.optimizer.step()
+                # self.model.zero_grad()
+                # loss.backward()
+                # self.optimizer.step()
                 total_loss += loss.item()
                 n += 1
             self.model.eval()

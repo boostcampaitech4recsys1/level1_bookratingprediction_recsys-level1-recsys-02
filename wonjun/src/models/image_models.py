@@ -93,9 +93,9 @@ class CNN_FM:
                     fields, target = [data['user_isbn_vector'].to(self.device), data['img_vector'].to(self.device)], data['label'].to(self.device)
                 y = self.model(fields)
                 loss = self.criterion(y, target.float())
-                self.model.zero_grad()
-                loss.backward()
-                self.optimizer.step()
+                # self.model.zero_grad()
+                # loss.backward()
+                # self.optimizer.step()
                 val_total_loss += loss.item()
                 val_n += 1
             if minimum_loss > (val_total_loss/val_n):
@@ -107,6 +107,9 @@ class CNN_FM:
             else:
                 loss_list.append([epoch, total_loss/n, val_total_loss/val_n, 'None'])
             tk0.set_postfix(train_loss=total_loss/n, valid_loss=val_total_loss/val_n)
+            print("train loss", total_loss/n, "valid loss", val_total_loss/val_n)
+
+            
 
 
     def predict(self, test_data_loader):
