@@ -162,6 +162,7 @@ def process_user_data(users: pd.DataFrame) -> pd.DataFrame:
 
 
 def process_item_data(books: pd.DataFrame) -> pd.DataFrame:
+    '''
     # summary 삭제
     books.drop(["summary"], axis=1, inplace=True)
 
@@ -450,7 +451,7 @@ def process_item_data(books: pd.DataFrame) -> pd.DataFrame:
 
     books["book_author"] = books["book_author"].apply(text_preprocessing_func)
 
-    ########
+    ########'''
 
     return books
 
@@ -537,7 +538,9 @@ def tree_data_load(args):
     users = process_user_data(users)
 
     books = pd.read_csv(args.DATA_PATH + "books.csv")
-    books = process_item_data(books)
+    # 오래 걸려서 그냥 일단 저장
+    # books = process_item_data(books)
+    books = pd.read_csv(args.DATA_PATH + "books_processed.csv")
 
     train = pd.read_csv(args.DATA_PATH + "train_ratings.csv")
     test = pd.read_csv(args.DATA_PATH + "test_ratings.csv")
