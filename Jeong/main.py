@@ -8,11 +8,13 @@ from src.data import context_data_load, context_data_split, context_data_loader
 from src.data import dl_data_load, dl_data_split, dl_data_loader
 from src.data import image_data_load, image_data_split, image_data_loader
 from src.data import text_data_load, text_data_split, text_data_loader
+from src.data import tree_data_load, tree_data_split, tree_data_loader
 
 from src import FactorizationMachineModel, FieldAwareFactorizationMachineModel
 from src import NeuralCollaborativeFiltering, WideAndDeepModel, DeepCrossNetworkModel
 from src import CNN_FM
 from src import DeepCoNN
+from src import DecisionTreeModel
 
 
 def main(args):
@@ -31,6 +33,8 @@ def main(args):
 
         nltk.download("punkt")
         data = text_data_load(args)
+    elif args.MODEL == "CATBOOST":
+        data = tree_data_load(args)
     else:
         pass
 
@@ -51,6 +55,10 @@ def main(args):
     elif args.MODEL == "DeepCoNN":
         data = text_data_split(args, data)
         data = text_data_loader(args, data)
+
+    elif args.MODEL == "CATBOOST":
+        data = tree_data_split(args, data)
+        data = tree_data_loader(args, data)
     else:
         pass
 
@@ -70,6 +78,8 @@ def main(args):
         model = CNN_FM(args, data)
     elif args.MODEL == "DeepCoNN":
         model = DeepCoNN(args, data)
+    elif args.MODEL == "CATBOOST":
+        model = DecisionTreeModel(args, data)
     else:
         pass
 
@@ -85,13 +95,24 @@ def main(args):
         predicts = model.predict(data["test_dataloader"])
     elif args.MODEL == "DeepCoNN":
         predicts = model.predict(data["test_dataloader"])
+    elif args.MODEL == "CATBOOST":
+        predicts = model.predict(data["test_dataloader"])
     else:
         pass
 
     ######################## SAVE PREDICT
     print(f"--------------- SAVE {args.MODEL} PREDICT ---------------")
     submission = pd.read_csv(args.DATA_PATH + "sample_submission.csv")
-    if args.MODEL in ("FM", "FFM", "NCF", "WDN", "DCN", "CNN_FM", "DeepCoNN"):
+    if args.MODEL in (
+        "FM",
+        "FFM",
+        "NCF",
+        "WDN",
+        "DCN",
+        "CNN_FM",
+        "DeepCoNN",
+        "CATBOOST",
+    ):
         submission["rating"] = predicts
     else:
         pass
@@ -119,7 +140,7 @@ if __name__ == "__main__":
     arg(
         "--MODEL",
         type=str,
-        choices=["FM", "FFM", "NCF", "WDN", "DCN", "CNN_FM", "DeepCoNN"],
+        choices=["FM", "FFM", "NCF", "WDN", "DCN", "CNN_FM", "DeepCoNN", "CATBOOST"],
         help="학습 및 예측할 모델을 선택할 수 있습니다.",
     )
     arg("--DATA_SHUFFLE", type=bool, default=True, help="데이터 셔플 여부를 조정할 수 있습니다.")
