@@ -1,6 +1,9 @@
 ### Dataset
 */data/
 ​
+### model parameter
+*/models/
+
 # macOS + Windows
 .DS_Store
 ._*
@@ -85,3 +88,6 @@ venv.bak/
 
 # Submit
 */submit
+
+### catboost
+*/catboost_info/
