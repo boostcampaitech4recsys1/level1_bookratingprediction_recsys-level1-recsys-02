@@ -45,9 +45,9 @@ def process_context_data(users, books, ratings1, ratings2):
     test_df['location_state'] = test_df['location_state'].map(loc_state2idx)
     test_df['location_country'] = test_df['location_country'].map(loc_country2idx)
 
-    #train_df['age'] = train_df['age'].fillna(int(train_df['age'].mean()))
+    #train_df['age'] = train_df['age'].dropna(axis=0)
     #train_df['age'] = train_df['age'].apply(age_map)
-    #test_df['age'] = test_df['age'].fillna(int(test_df['age'].mean()))
+    #test_df['age'] = test_df['age'].dropna(axis=0)
     #test_df['age'] = test_df['age'].apply(age_map)
 
     # book 파트 인덱싱
@@ -83,7 +83,7 @@ def context_data_load(args):
     ######################## DATA LOAD
     users = pd.read_csv(args.DATA_PATH + 'users_pp.csv')
     books = pd.read_csv(args.DATA_PATH + 'books_pp.csv')
-    train = pd.read_csv(args.DATA_PATH + 'train_pp.csv')
+    train = pd.read_csv(args.DATA_PATH + 'train_ppp.csv')
     test = pd.read_csv(args.DATA_PATH + 'test_ratings.csv')
     sub = pd.read_csv(args.DATA_PATH + 'sample_submission.csv')
 
