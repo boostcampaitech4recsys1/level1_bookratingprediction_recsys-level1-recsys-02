@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader, Dataset
 from tqdm import tqdm
+import re
 
 
 def process_user_data(users: pd.DataFrame) -> pd.DataFrame:
@@ -153,8 +154,8 @@ def process_user_data(users: pd.DataFrame) -> pd.DataFrame:
         else:
             return x // 10
 
-    users[~users["age"].isna()]["age"] = (
-        users[~users["age"].isna()]["age"].apply(age_map).astype(int)
+    users.loc[~users["age"].isna(), "age"] = (
+        users.loc[~users["age"].isna(), "age"].apply(age_map).astype(int)
     )
 
     return users
@@ -272,6 +273,7 @@ def process_item_data(books: pd.DataFrame) -> pd.DataFrame:
     # publisher 처리 EDA 기본 코드 활용
 
     # 기본 텍스트 전처리
+    # 오래걸려서 잠시 주석처리
     books["publisher"] = books["publisher"].apply(text_preprocessing_func)
 
     publisher_dict = (books["publisher"].value_counts()).to_dict()
@@ -430,7 +432,7 @@ def process_item_data(books: pd.DataFrame) -> pd.DataFrame:
     }
     check_list = []
     books["isbn_country"] = "na"
-    for idx in range(len(books)):
+    for idx in tqdm(range(len(books))):
         isbn = books["isbn"][idx][:5]
         if isbn[0] in isbn_code.keys():
             books.at[idx, "isbn_country"] = isbn_code[isbn[0]]
@@ -444,7 +446,7 @@ def process_item_data(books: pd.DataFrame) -> pd.DataFrame:
             books.at[idx, "isbn_country"] = isbn_code[isbn[:]]
         else:
             check_list.append(isbn)
-    books[books["isbn_country"] == "na"]["isbn_country"] = "english"
+    books.loc[books["isbn_country"] == "na", "isbn_country"] = "english"
 
     books["book_author"] = books["book_author"].apply(text_preprocessing_func)
 
@@ -462,15 +464,20 @@ def process_tree_data(
 
     ratings = pd.concat([rating_train, rating_test]).reset_index(drop=True)
 
-    # user에서 활용할 데이터 목록
-    user_cols = [
+    # 활용할 context 목록
+    context_cols = [
         "age",
         "location_state",
         "location_country",
-        "publisher",
-        "language",
         "book_author",
+        "year_of_publication",
+        "publisher",
+        "category_high",
+        "isbn_country",
     ]
+
+    # user에서 활용할 데이터 목록
+    user_cols = ["user_id", "age", "location_state", "location_country"]
 
     # book에서 활용할 데이터 목록
     book_cols = [
@@ -483,17 +490,17 @@ def process_tree_data(
     ]
 
     # 인덱싱 처리된 데이터 조인
-    context_df = ratings.merge(users, on="user_id", how="left").merge(
+    context_df = ratings.merge(users[user_cols], on="user_id", how="left").merge(
         books[book_cols],
         on="isbn",
         how="left",
     )
-    train_df = rating_train.merge(users, on="user_id", how="left").merge(
+    train_df = rating_train.merge(users[user_cols], on="user_id", how="left").merge(
         books[book_cols],
         on="isbn",
         how="left",
     )
-    test_df = rating_test.merge(users, on="user_id", how="left").merge(
+    test_df = rating_test.merge(users[user_cols], on="user_id", how="left").merge(
         books[book_cols],
         on="isbn",
         how="left",
@@ -504,19 +511,21 @@ def process_tree_data(
         col: str,
         train_df: pd.DataFrame,
         test_df: pd.DataFrame,
-    ) -> dict():
+    ):
         """
         context df의 col에 대해서 idx화 해주기.
         """
         idx_dict = {v: k for k, v in enumerate(context_df[col].unique())}
         train_df[col] = train_df[col].map(idx_dict)
         test_df[col] = test_df[col].map(idx_dict)
-        return idx_dict
+        return idx_dict, train_df, test_df
 
     idx = dict()
     # 인덱싱 처리
-    for col in user_cols:
-        idx[f"{col}2idx"] = col2idx(context_df, col, train_df, test_df)
+    for col in context_cols:
+        idx[f"{col}2idx"], train_df, test_df = col2idx(
+            context_df, col, train_df, test_df
+        )
 
     return idx, train_df, test_df
 
@@ -528,7 +537,7 @@ def tree_data_load(args):
     users = process_user_data(users)
 
     books = pd.read_csv(args.DATA_PATH + "books.csv")
-    books - process_item_data(books)
+    books = process_item_data(books)
 
     train = pd.read_csv(args.DATA_PATH + "train_ratings.csv")
     test = pd.read_csv(args.DATA_PATH + "test_ratings.csv")
