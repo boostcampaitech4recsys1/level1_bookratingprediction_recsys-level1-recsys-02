@@ -100,6 +100,9 @@ def main(args):
     else:
         pass
 
+    ######################## RULE-BASED
+    print(f"--------------- RULE BASED ---------------")
+
     ######################## SAVE PREDICT
     print(f"--------------- SAVE {args.MODEL} PREDICT ---------------")
     submission = pd.read_csv(args.DATA_PATH + "sample_submission.csv")
@@ -148,6 +151,7 @@ if __name__ == "__main__":
         "--TEST_SIZE", type=float, default=0.2, help="Train/Valid split 비율을 조정할 수 있습니다."
     )
     arg("--SEED", type=int, default=42, help="seed 값을 조정할 수 있습니다.")
+    arg("--RULE-BASED", type=bool, default=False, help="rule-based 적용 할래 말래?")
 
     ############### TRAINING OPTION
     arg("--BATCH_SIZE", type=int, default=64, help="Batch size를 조정할 수 있습니다.")
@@ -305,6 +309,20 @@ if __name__ == "__main__":
         type=bool,
         default=False,
         help="DEEP_CONN에서 학습된 parameter를 불러올 수 있습니다.",
+    )
+
+    ############### CatBoost
+    arg(
+        "--CATBOOST_ITERS",
+        type=int,
+        default=10,
+        help="CATBOOST iterations 설정.",
+    )
+    arg(
+        "--CATBOOST_DEPTH",
+        type=int,
+        default=None,
+        help="CATBOOST depth 설정.",
     )
 
     args = parser.parse_args()
