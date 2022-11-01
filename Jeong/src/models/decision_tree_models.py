@@ -50,7 +50,9 @@ class DecisionTreeModel:
             x_valid = x_valid.numpy()
             y_valid = y_valid.numpy()
             y.extend(y_valid)
-            y_hat.extend(self.catboost_regressor.predict(data=x_valid))
+            temp = self.catboost_regressor.predict(data=x_valid)
+            temp = np.around(temp)
+            y_hat.extend(temp)
         return rmse(y, y_hat)
 
     def predict(self, test_dataloader):
@@ -60,5 +62,6 @@ class DecisionTreeModel:
             for x_test in x_test_batch:
                 x_test = x_test.numpy()
                 temp = self.catboost_regressor.predict(data=x_test)
+                temp = np.around(temp)
                 predicts.extend(temp)
         return predicts
