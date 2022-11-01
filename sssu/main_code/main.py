@@ -1,6 +1,8 @@
 import time
 import argparse
 import pandas as pd
+import numpy as np
+from tqdm import tqdm
 
 from src import seed_everything
 
@@ -94,12 +96,41 @@ def main(args):
         submission['rating'] = predicts
     else:
         pass
+    
+    ###################### RULE BASED
 
-    now = time.localtime()
+    # train = pd.read_csv('./data/train_ratings.csv')
+
+    # train_user_id = train['user_id'].unique().tolist()
+    # train_isbn_id = train['isbn'].unique().tolist()
+    # all_mean = np.mean(train['rating'])
+    
+    # count = 0
+    # for idx in tqdm(range(len(submission))):
+    #     if submission['user_id'][idx] not in train_user_id and submission['isbn'][idx] not in train_isbn_id :
+    #         submission.at[idx, 'rating'] = all_mean
+    #         count+=1
+    #     elif submission['user_id'][idx] not in train_user_id: # user가 없으면 isbn의 평균
+    #         isbn_idx = submission["isbn"][idx]
+    #         isbn_mean = np.mean(train[train['isbn']==isbn_idx]['rating'])
+    #         submission.at[idx, 'rating'] = isbn_mean
+    #         count+=1
+    #     elif submission['isbn'][idx] not in train_isbn_id: # isbn이 없으면 user의 평균
+    #         user_idx = submission["user_id"][idx]
+    #         user_mean = np.mean(train[train['user_id']==user_idx]['rating'])
+    #         submission.at[idx, 'rating'] = user_mean
+    #         count+=1
+    #     else:
+    #         pass
+    # print(count)
+    ###############################################
+    now = time.localtime()s
     now_date = time.strftime('%Y%m%d', now)
     now_hour = time.strftime('%X', now)
     save_time = now_date + '_' + now_hour.replace(':', '')
     submission.to_csv('submit/{}_{}.csv'.format(save_time, args.MODEL), index=False)
+
+    
 
 
 
@@ -114,12 +145,12 @@ if __name__ == "__main__":
     arg('--MODEL', type=str, choices=['FM', 'FFM', 'NCF', 'WDN', 'DCN', 'CNN_FM', 'DeepCoNN'],
                                 help='학습 및 예측할 모델을 선택할 수 있습니다.')
     arg('--DATA_SHUFFLE', type=bool, default=True, help='데이터 셔플 여부를 조정할 수 있습니다.')
-    arg('--TEST_SIZE', type=float, default=0.2, help='Train/Valid split 비율을 조정할 수 있습니다.')
-    arg('--SEED', type=int, default=42, help='seed 값을 조정할 수 있습니다.')
+    arg('--TEST_SIZE', type=float, default=0.3, help='Train/Valid split 비율을 조정할 수 있습니다.')
+    arg('--SEED', type=int, default=417, help='seed 값을 조정할 수 있습니다.')
     
     ############### TRAINING OPTION
-    arg('--BATCH_SIZE', type=int, default=1024, help='Batch size를 조정할 수 있습니다.')
-    arg('--EPOCHS', type=int, default=10, help='Epoch 수를 조정할 수 있습니다.')
+    arg('--BATCH_SIZE', type=int, default=64, help='Batch size를 조정할 수 있습니다.')
+    arg('--EPOCHS', type=int, default=5, help='Epoch 수를 조정할 수 있습니다.')
     arg('--LR', type=float, default=1e-3, help='Learning Rate를 조정할 수 있습니다.')
     arg('--WEIGHT_DECAY', type=float, default=1e-6, help='Adam optimizer에서 정규화에 사용하는 값을 조정할 수 있습니다.')
 
@@ -133,8 +164,8 @@ if __name__ == "__main__":
     arg('--FFM_EMBED_DIM', type=int, default=16, help='FFM에서 embedding시킬 차원을 조정할 수 있습니다.')
 
     ############### NCF
-    arg('--NCF_EMBED_DIM', type=int, default=16, help='NCF에서 embedding시킬 차원을 조정할 수 있습니다.')
-    arg('--NCF_MLP_DIMS', type=list, default=(16, 16), help='NCF에서 MLP Network의 차원을 조정할 수 있습니다.')
+    arg('--NCF_EMBED_DIM', type=int, default=256, help='NCF에서 embedding시킬 차원을 조정할 수 있습니다.')
+    arg('--NCF_MLP_DIMS', type=list, default=(128, 64, 64, 32, 32, 16, 16), help='NCF에서 MLP Network의 차원을 조정할 수 있습니다.')
     arg('--NCF_DROPOUT', type=float, default=0.2, help='NCF에서 Dropout rate를 조정할 수 있습니다.')
 
     ############### WDN
