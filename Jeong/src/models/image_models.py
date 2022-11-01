@@ -46,18 +46,18 @@ class _CNN_FM(torch.nn.Module):
         self.embedding = FeaturesEmbedding(field_dims, embed_dim)
         self.cnn = CNN_Base()
         self.fm = FactorizationMachine_v(
-            input_dim=(embed_dim * 2) + (40),
+            input_dim=(embed_dim * len(field_dims)) + (40),
             latent_dim=latent_dim,
         )
 
     def forward(self, x):
-        user_isbn_vector, img_vector = x[0], x[1]
-        user_isbn_feature = self.embedding(user_isbn_vector)
+        context_vector, img_vector = x[0], x[1]
+        context_feature = self.embedding(context_vector)
         img_feature = self.cnn(img_vector)
         feature_vector = torch.cat(
             [
-                user_isbn_feature.view(
-                    -1, user_isbn_feature.size(1) * user_isbn_feature.size(2)
+                context_feature.view(
+                    -1, context_feature.size(1) * context_feature.size(2)
                 ),
                 img_feature,
             ],
@@ -72,9 +72,9 @@ class CNN_FM:
         super().__init__()
         self.device = args.DEVICE
         self.model = _CNN_FM(
-            np.array([len(data["user2idx"]), len(data["isbn2idx"])], dtype=np.uint32),
-            args.CNN_FM_EMBED_DIM,
-            args.CNN_FM_LATENT_DIM,
+            field_dims=data["field_dims"],
+            embed_dim=args.CNN_FM_EMBED_DIM,
+            latent_dim=args.CNN_FM_LATENT_DIM,
         ).to(self.device)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=args.LR)
         self.train_data_loader = data["train_dataloader"]
@@ -97,12 +97,12 @@ class CNN_FM:
             n = 0
             for i, data in enumerate(self.train_data_loader):
                 if len(data) == 2:
-                    fields, target = [data["user_isbn_vector"].to(self.device)], data[
+                    fields, target = [data["context_vector"].to(self.device)], data[
                         "label"
                     ].to(self.device)
                 else:
                     fields, target = [
-                        data["user_isbn_vector"].to(self.device),
+                        data["context_vector"].to(self.device),
                         data["img_vector"].to(self.device),
                     ], data["label"].to(self.device)
                 y = self.model(fields)
@@ -117,17 +117,17 @@ class CNN_FM:
             val_n = 0
             for i, data in enumerate(self.valid_data_loader):
                 if len(data) == 2:
-                    fields, target = [data["user_isbn_vector"].to(self.device)], data[
+                    fields, target = [data["context_vector"].to(self.device)], data[
                         "label"
                     ].to(self.device)
                 else:
                     fields, target = [
-                        data["user_isbn_vector"].to(self.device),
+                        data["context_vector"].to(self.device),
                         data["img_vector"].to(self.device),
                     ], data["label"].to(self.device)
                 y = self.model(fields)
                 loss = self.criterion(y, target.float())
-                self.model.zero_grad()
+                # self.model.zero_grad()
                 val_total_loss += loss.item()
                 val_n += 1
             if minimum_loss > (val_total_loss / val_n):
@@ -147,6 +147,27 @@ class CNN_FM:
             tk0.set_postfix(
                 train_loss=total_loss / n, valid_loss=val_total_loss / val_n
             )
+        for epoch in tqdm.tqdm(range(self.epochs), smoothing=0, mininterval=1.0):
+            self.model.train()
+            total_loss = 0
+            n = 0
+            for i, data in enumerate(self.valid_data_loader):
+                if len(data) == 2:
+                    fields, target = [data["context_vector"].to(self.device)], data[
+                        "label"
+                    ].to(self.device)
+                else:
+                    fields, target = [
+                        data["context_vector"].to(self.device),
+                        data["img_vector"].to(self.device),
+                    ], data["label"].to(self.device)
+                y = self.model(fields)
+                loss = self.criterion(y, target.float())
+                self.model.zero_grad()
+                loss.backward()
+                self.optimizer.step()
+                total_loss += loss.item()
+                n += 1
 
     def predict(self, test_data_loader):
         self.model.eval()
@@ -155,12 +176,12 @@ class CNN_FM:
         with torch.no_grad():
             for data in test_data_loader:
                 if len(data) == 2:
-                    fields, target = [data["user_isbn_vector"].to(self.device)], data[
+                    fields, target = [data["context_vector"].to(self.device)], data[
                         "label"
                     ].to(self.device)
                 else:
                     fields, target = [
-                        data["user_isbn_vector"].to(self.device),
+                        data["context_vector"].to(self.device),
                         data["img_vector"].to(self.device),
                     ], data["label"].to(self.device)
                 y = self.model(fields)
