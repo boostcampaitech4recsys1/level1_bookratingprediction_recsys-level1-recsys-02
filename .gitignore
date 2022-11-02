@@ -84,11 +84,7 @@ venv.bak/
 .idea/
 
 # Submit
-<<<<<<< HEAD
 */submit
 
 # models
 */models
-=======
-*.csv
->>>>>>> 5eea6df878cfc6c25be5832cb30d99861a2cf892
