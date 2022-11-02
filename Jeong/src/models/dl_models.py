@@ -58,7 +58,25 @@ class NeuralCollaborativeFiltering:
 
             rmse_score = self.predict_train()
             print('epoch:', epoch, 'validation: rmse:', rmse_score)
+        
+        # 학습이 끝난 후 validation set 학습
+        for epoch in range(self.epochs):
+            self.model.train()
+            total_loss = 0
+            tk0 = tqdm.tqdm(self.valid_dataloader, smoothing=0, mininterval=1.0)
+            for i, (fields, target) in enumerate(tk0):
+                fields, target = fields.to(self.device), target.to(self.device)
+                y = self.model(fields)
+                loss = self.criterion(y, target.float())
+                self.model.zero_grad()
+                loss.backward()
+                self.optimizer.step()
+                total_loss += loss.item()
+                if (i + 1) % self.log_interval == 0:
+                    tk0.set_postfix(loss=total_loss / self.log_interval)
+                    total_loss = 0
 
+        return rmse_score
 
     def predict_train(self):
         self.model.eval()
