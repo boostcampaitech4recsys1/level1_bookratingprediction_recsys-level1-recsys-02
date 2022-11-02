@@ -109,9 +109,9 @@ class DeepCoNN:
             val_total_loss = 0
             val_n = 0
             for i, data in enumerate(self.valid_data_loader):
-                if len(data)==3:
+                if len(data) == 3:
                     fields, target = [data['user_summary_merge_vector'].to(self.device), data['item_summary_vector'].to(self.device)], data['label'].to(self.device)
-                elif len(data)==4:
+                elif len(data) == 4:
                     fields, target = [data['user_isbn_vector'].to(self.device), data['user_summary_merge_vector'].to(self.device), data['item_summary_vector'].to(self.device)], data['label'].to(self.device)
                 y = self.model(fields)
                 loss = self.criterion(y, target.float())
@@ -136,9 +136,9 @@ class DeepCoNN:
         targets, predicts = list(), list()
         with torch.no_grad():
             for data in test_data_loader:
-                if len(data)==3:
+                if len(data) == 3:
                     fields, target = [data['user_summary_merge_vector'].to(self.device), data['item_summary_vector'].to(self.device)], data['label'].to(self.device)
-                elif len(data)==4:
+                elif len(data) == 4:
                     fields, target = [data['user_isbn_vector'].to(self.device), data['user_summary_merge_vector'].to(self.device), data['item_summary_vector'].to(self.device)], data['label'].to(self.device)
                 y = self.model(fields)
                 targets.extend(target.tolist())

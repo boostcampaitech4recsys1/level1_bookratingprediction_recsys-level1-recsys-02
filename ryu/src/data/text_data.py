@@ -52,9 +52,9 @@ def process_text_data(df, books, user2idx, isbn2idx, device, train=False, user_s
 
     df_ = pd.merge(df_, books_[['isbn', 'summary']], on='isbn', how='left')
     df_['summary'].fillna('None', inplace=True)
-    df_['summary'] = df_['summary'].apply(lambda x:text_preprocessing(x))
-    df_['summary'].replace({'':'None', ' ':'None'}, inplace=True)
-    df_['summary_length'] = df_['summary'].apply(lambda x:len(x))
+    df_['summary'] = df_['summary'].apply(lambda x: text_preprocessing(x))
+    df_['summary'].replace({'': 'None', ' ': 'None'}, inplace=True)
+    df_['summary_length'] = df_['summary'].apply(lambda x: len(x))
 
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
     model = BertModel.from_pretrained('bert-base-uncased').to(device)
@@ -81,7 +81,7 @@ def process_text_data(df, books, user2idx, isbn2idx, device, train=False, user_s
         print('Create Item Summary Vector')
         item_summary_vector_list = []
         books_text_df = df_[['isbn', 'summary']].copy()
-        books_text_df= books_text_df.drop_duplicates().reset_index(drop=True)
+        books_text_df = books_text_df.drop_duplicates().reset_index(drop=True)
         books_text_df['summary'].fillna('None', inplace=True)
         for summary in tqdm(books_text_df['summary']):
             vector = text_to_vector(summary, tokenizer, model, device)
@@ -155,8 +155,8 @@ def text_data_load(args):
     idx2user = {idx: id for idx, id in enumerate(ids)}
     idx2isbn = {idx: isbn for idx, isbn in enumerate(isbns)}
 
-    user2idx = {id:idx for idx, id in idx2user.items()}
-    isbn2idx = {isbn:idx for idx, isbn in idx2isbn.items()}
+    user2idx = {id: idx for idx, id in idx2user.items()}
+    isbn2idx = {isbn: idx for idx, isbn in idx2isbn.items()}
 
     train['user_id'] = train['user_id'].map(user2idx)
     sub['user_id'] = sub['user_id'].map(user2idx)
