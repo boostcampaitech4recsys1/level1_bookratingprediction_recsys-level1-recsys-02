@@ -35,14 +35,14 @@ def process_context_data(users, books, ratings1, ratings2):
 
     # 인덱싱 처리
     #loc_city2idx = {v:k for k,v in enumerate(context_df['location_city'].unique())}
-    loc_state2idx = {v:k for k,v in enumerate(context_df['location_state'].unique())}
+    #loc_state2idx = {v:k for k,v in enumerate(context_df['location_state'].unique())}
     loc_country2idx = {v:k for k,v in enumerate(context_df['location_country'].unique())}
 
     #train_df['location_city'] = train_df['location_city'].map(loc_city2idx)
-    train_df['location_state'] = train_df['location_state'].map(loc_state2idx)
+    #train_df['location_state'] = train_df['location_state'].map(loc_state2idx)
     train_df['location_country'] = train_df['location_country'].map(loc_country2idx)
     #test_df['location_city'] = test_df['location_city'].map(loc_city2idx)
-    test_df['location_state'] = test_df['location_state'].map(loc_state2idx)
+    #test_df['location_state'] = test_df['location_state'].map(loc_state2idx)
     test_df['location_country'] = test_df['location_country'].map(loc_country2idx)
 
     #train_df['age'] = train_df['age'].dropna(axis=0)
@@ -67,7 +67,7 @@ def process_context_data(users, books, ratings1, ratings2):
 
     idx = {
         #"loc_city2idx":loc_city2idx,
-        "loc_state2idx":loc_state2idx,
+        #"loc_state2idx":loc_state2idx,
         "loc_country2idx":loc_country2idx,
         "category2idx":category2idx,
         "publisher2idx":publisher2idx,
@@ -81,8 +81,8 @@ def process_context_data(users, books, ratings1, ratings2):
 def context_data_load(args):
 
     ######################## DATA LOAD
-    users = pd.read_csv(args.DATA_PATH + 'users_pp.csv')
-    books = pd.read_csv(args.DATA_PATH + 'books_pp.csv')
+    users = pd.read_csv(args.DATA_PATH + 'users_1102.csv')
+    books = pd.read_csv(args.DATA_PATH + 'books_1102.csv')
     train = pd.read_csv(args.DATA_PATH + 'train_ppp.csv')
     test = pd.read_csv(args.DATA_PATH + 'test_ratings.csv')
     sub = pd.read_csv(args.DATA_PATH + 'sample_submission.csv')
@@ -108,7 +108,7 @@ def context_data_load(args):
 
     idx, context_train, context_test = process_context_data(users, books, train, test)
     field_dims = np.array([len(user2idx), len(isbn2idx),
-                            len(idx['loc_state2idx']), len(idx['loc_country2idx']),
+                            len(idx['loc_country2idx']),
                             len(idx['category2idx']), len(idx['publisher2idx']), len(idx['language2idx']), len(idx['author2idx'])], dtype=np.uint32)
 
     data = {
