@@ -4,6 +4,9 @@
 ### model parameter
 */models/
 
+### tuning result
+*/tuning_result/
+
 # macOS + Windows
 .DS_Store
 ._*
