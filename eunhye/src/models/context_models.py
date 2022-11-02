@@ -16,9 +16,18 @@ class FactorizationMachineModel:
         super().__init__()
 
         self.criterion = RMSELoss()
+        
+        self.k_fold = args.K_FOLD
+        self.num_folds = args.NUM_FOLDS
+        
+        if self.k_fold:
+            self.data = data
+            self.train_dataloader = data['fold_1_train_dataloader']
+            self.valid_dataloader = data['fold_1_valid_dataloader']
+        else:
+            self.train_dataloader = data['train_dataloader']
+            self.valid_dataloader = data['valid_dataloader']
 
-        self.train_dataloader = data['train_dataloader']
-        self.valid_dataloader = data['valid_dataloader']
         self.field_dims = data['field_dims']
 
         self.embed_dim = args.FM_EMBED_DIM
@@ -33,8 +42,11 @@ class FactorizationMachineModel:
         self.optimizer = torch.optim.Adam(params=self.model.parameters(), lr=self.learning_rate, amsgrad=True, weight_decay=self.weight_decay)
 
 
-    def train(self):
+    def train(self, fold=0):
       # model: type, optimizer: torch.optim, train_dataloader: DataLoader, criterion: torch.nn, device: str, log_interval: int=100
+        if self.k_fold:
+            self.train_dataloader = self.data[f'fold_{fold}_train_dataloader']
+            self.valid_dataloader = self.data[f'fold_{fold}_valid_dataloader']
         for epoch in range(self.epochs):
             self.model.train()
             total_loss = 0
@@ -76,7 +88,7 @@ class FactorizationMachineModel:
         with torch.no_grad():
             for fields in tqdm.tqdm(dataloader, smoothing=0, mininterval=1.0):
                 fields = fields[0].to(self.device)
-                y = self.model(fields)
+                y = torch.round(self.model(fields))
                 predicts.extend(y.tolist())
         return predicts
 

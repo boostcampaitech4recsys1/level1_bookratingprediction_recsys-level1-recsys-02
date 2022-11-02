@@ -74,7 +74,15 @@ def main(args):
 
     ######################## TRAIN
     print(f'--------------- {args.MODEL} TRAINING ---------------')
-    model.train()
+    if args.K_FOLD:
+        for fold in range(1, args.NUM_FOLDS+1):
+            print(f'--------------- FOLD {fold} START ---------------')
+            if args.MODEL=='FM':
+                model = FactorizationMachineModel(args, data)
+                model.train(fold=fold)
+            print(f'--------------- FOLD {fold} END ---------------')
+    else:
+        model.train()
 
     ######################## INFERENCE
     print(f'--------------- {args.MODEL} PREDICT ---------------')
@@ -110,18 +118,22 @@ if __name__ == "__main__":
     arg = parser.add_argument
 
     ############### BASIC OPTION
-    arg('--DATA_PATH', type=str, default='data/', help='Data path를 설정할 수 있습니다.')
+    arg('--DATA_PATH', type=str, default='../main_code/data/', help='Data path를 설정할 수 있습니다.')
     arg('--MODEL', type=str, choices=['FM', 'FFM', 'NCF', 'WDN', 'DCN', 'CNN_FM', 'DeepCoNN'],
                                 help='학습 및 예측할 모델을 선택할 수 있습니다.')
     arg('--DATA_SHUFFLE', type=bool, default=True, help='데이터 셔플 여부를 조정할 수 있습니다.')
     arg('--TEST_SIZE', type=float, default=0.2, help='Train/Valid split 비율을 조정할 수 있습니다.')
-    arg('--SEED', type=int, default=42, help='seed 값을 조정할 수 있습니다.')
+    arg('--SEED', type=int, default=417, help='seed 값을 조정할 수 있습니다.')
     
     ############### TRAINING OPTION
     arg('--BATCH_SIZE', type=int, default=1024, help='Batch size를 조정할 수 있습니다.')
-    arg('--EPOCHS', type=int, default=10, help='Epoch 수를 조정할 수 있습니다.')
+    arg('--EPOCHS', type=int, default=5, help='Epoch 수를 조정할 수 있습니다.')
     arg('--LR', type=float, default=1e-3, help='Learning Rate를 조정할 수 있습니다.')
     arg('--WEIGHT_DECAY', type=float, default=1e-6, help='Adam optimizer에서 정규화에 사용하는 값을 조정할 수 있습니다.')
+
+    arg('--K_FOLD', type=bool, default=False, help='K-Fold Validation 여부를 조정할 수 있습니다.')
+    arg('--K_FOLD_TYPE', type=str, default='KFold', choices=['KFold', 'StratifiedKFold'], help='K-Fold의 방법을 조정할 수 있습니다.')
+    arg('--NUM_FOLDS', type=int, default=5, help='K-Fold의 Fold 개수를 조정할 수 있습니다.')
 
     ############### GPU
     arg('--DEVICE', type=str, default='cuda', choices=['cuda', 'cpu'], help='학습에 사용할 Device를 조정할 수 있습니다.')
