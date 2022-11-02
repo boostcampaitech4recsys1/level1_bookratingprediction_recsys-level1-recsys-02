@@ -25,7 +25,10 @@ def main(args):
     if args.MODEL in ('FM', 'FFM'):
         data = context_data_load(args)
     elif args.MODEL in ('NCF', 'WDN', 'DCN'):
-        data = dl_data_load(args)
+        if args.NCF_USE_CONTEXT:
+            data = context_data_load(args)
+        else:
+            data = dl_data_load(args)
     elif args.MODEL == 'CNN_FM':
         data = image_data_load(args)
     elif args.MODEL == 'DeepCoNN':
@@ -44,8 +47,12 @@ def main(args):
         data = context_data_loader(args, data)
 
     elif args.MODEL in ('NCF', 'WDN', 'DCN'):
-        data = dl_data_split(args, data)
-        data = dl_data_loader(args, data)
+        if args.NCF_USE_CONTEXT:
+            data = context_data_split(args, data)
+            data = context_data_loader(args, data)
+        else:
+            data = dl_data_split(args, data)
+            data = dl_data_loader(args, data)
 
     elif args.MODEL == 'CNN_FM':
         data = image_data_split(args, data)
@@ -140,6 +147,7 @@ if __name__ == "__main__":
     arg('--NCF_EMBED_DIM', type=int, default=64, help='NCF에서 embedding시킬 차원을 조정할 수 있습니다.')
     arg('--NCF_MLP_DIMS', type=list, default=(64, 64), help='NCF에서 MLP Network의 차원을 조정할 수 있습니다.')
     arg('--NCF_DROPOUT', type=float, default=0.1, help='NCF에서 Dropout rate를 조정할 수 있습니다.')
+    arg("--NCF_USE_CONTEXT", type=bool, default=False, help="NCF에서 context 데이터의 사용 여부를 조정할 수 있습니다.")
 
     ############### WDN
     arg('--WDN_EMBED_DIM', type=int, default=16, help='WDN에서 embedding시킬 차원을 조정할 수 있습니다.')
