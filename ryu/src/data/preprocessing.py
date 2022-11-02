@@ -674,5 +674,5 @@ def book_language_preprocessing_func(books: pd.DataFrame) -> pd.DataFrame:
 
 
 def books_author_preprocessing_func(books: pd.DataFrame) -> pd.DataFrame :
-    books['book_author'] = books['author'].apply(text_preprocessing_func)
+    books['book_author'] = books['book_author'].apply(text_preprocessing_func)
     return books
