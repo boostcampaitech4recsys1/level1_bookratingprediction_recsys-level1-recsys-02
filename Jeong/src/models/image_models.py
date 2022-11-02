@@ -5,6 +5,8 @@ import torch
 import torch.nn as nn
 from ._models import RMSELoss, FeaturesEmbedding, FactorizationMachine_v
 
+from torchvision import models
+
 
 class CNN_Base(nn.Module):
     def __init__(
@@ -40,13 +42,29 @@ class CNN_Base(nn.Module):
         return x
 
 
+class ResNet(nn.Module):
+    def __init__(self):
+        super(ResNet, self).__init__()
+        self.resnet = models.resnet152(pretrained=True)
+        self.resnet.avgpool = nn.Identity()
+        self.resnet.fc = nn.Identity()
+
+        for param in self.resnet.parameters():
+            param.requires_grad_(False)
+
+    def forward(self, x):
+        x = self.resnet.forward(x)
+        return x
+
+
 class _CNN_FM(torch.nn.Module):
     def __init__(self, field_dims, embed_dim, latent_dim):
         super().__init__()
         self.embedding = FeaturesEmbedding(field_dims, embed_dim)
-        self.cnn = CNN_Base()
+        # self.cnn = CNN_Base()
+        self.cnn = ResNet()
         self.fm = FactorizationMachine_v(
-            input_dim=(embed_dim * len(field_dims)) + (40),
+            input_dim=(embed_dim * len(field_dims)) + (2048),
             latent_dim=latent_dim,
         )
 
