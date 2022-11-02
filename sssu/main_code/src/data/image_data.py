@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader, Dataset
 from torch.autograd import Variable
 from tqdm import tqdm
 
+
 class Image_Dataset(Dataset):
     def __init__(self, user_isbn_vector, img_vector, label):
         self.user_isbn_vector = user_isbn_vector

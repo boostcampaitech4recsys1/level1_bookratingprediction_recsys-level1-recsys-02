@@ -9,17 +9,20 @@ def text_preprocessing_func(text: str) -> str:
     """
     깨진 문자를 변환하고 특수문자를 삭제하는 함수
     """
-    text = text.replace("Ã?Â©", "e")  # 원래는 é인데 걍 e로 메움
-    text = text.replace("Ã©", "e")
-    text = text.replace("Ã?Â?", "e")  # 원래는 é인데 걍 e로 메움
-    text = text.lower()
-    text = text.replace("ã", "a")
-    text = text.replace("\xa0", " ")
-    text = text.replace("â", "a")
-    text = re.sub(r"[^\w\d ]", "", text)
-    del_list = ["³", "º", "ª", "¼", "µ", "¹", "²", "½"]
-    for del_word in del_list:
-        text = text.replace(del_word, "")
+    try:
+        text = text.replace("Ã?Â©", "e")  # 원래는 é인데 걍 e로 메움
+        text = text.replace("Ã©", "e")
+        text = text.replace("Ã?Â?", "e")  # 원래는 é인데 걍 e로 메움
+        text = text.lower()
+        text = text.replace("ã", "a")
+        text = text.replace("\xa0", " ")
+        text = text.replace("â", "a")
+        text = re.sub(r"[^\w\d ]", "", text)
+        del_list = ["³", "º", "ª", "¼", "µ", "¹", "²", "½"]
+        for del_word in del_list:
+            text = text.replace(del_word, "")
+    except:
+        return text
     return text
 
 
@@ -62,14 +65,6 @@ def location_preprocessing_func(users: pd.DataFrame) -> pd.DataFrame:
     modify_location = users[
         (users["location_country"].isna()) & (users["location_city"].notnull())
     ]["location_city"].values
-    location = (
-        users[
-            (users["location"].str.contains("seattle"))
-            & (users["location_country"].notnull())
-        ]["location"]
-        .value_counts()
-        .index[0]
-    )
 
     location_list = []
     for location in modify_location:
@@ -476,6 +471,7 @@ def category_preprocessing_func(books: pd.DataFrame) -> pd.DataFrame:
         "Travel": ["travel"],
         "Women": ["women"],
     }
+    books['category_high'] = books['category_high'].fillna('Unclassified')
 
     # grouping 하기
     for key, value in groupings.items():

@@ -98,6 +98,9 @@ def context_data_load(args):
     test = pd.read_csv(args.DATA_PATH + 'test_ratings.csv')
     sub = pd.read_csv(args.DATA_PATH + 'sample_submission.csv')
 
+    unique_user_ids = train["user_id"].unique()
+    unique_isbns = train["isbn"].unique()
+
     ids = pd.concat([train['user_id'], sub['user_id']]).unique()
     isbns = pd.concat([train['isbn'], sub['isbn']]).unique()
 
@@ -112,7 +115,7 @@ def context_data_load(args):
     books["category"] = books["category"].apply(text_preprocessing_func)
     books["publisher"] = books["publisher"].apply(text_preprocessing_func)
     books["language"] = books["language"].apply(text_preprocessing_func)
-    books["author"] = books["author"].apply(text_preprocessing_func)
+    books["book_author"] = books["book_author"].apply(text_preprocessing_func)
 
     books = category_preprocessing_func(books)
     books = book_title_preprocessing_func(books)
@@ -160,6 +163,8 @@ def context_data_load(args):
         "isbn2rating": isbn2rating,
         "user2rating": user2rating,
         "train_mean_rating": train_mean_rating,
+        "unique_user_ids": unique_user_ids,
+        "unique_isbns": unique_isbns,
     }
 
     return data
