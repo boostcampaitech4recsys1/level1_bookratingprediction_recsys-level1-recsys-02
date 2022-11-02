@@ -25,6 +25,8 @@ def process_dl_data(
         "publisher",
         "category_high",
         "isbn_country",
+        "title_ft",
+        "summary_ft",
     ]
 
     # 활용할 context 목록
@@ -32,6 +34,10 @@ def process_dl_data(
     context_cols.extend(book_cols)
     context_cols.remove("user_id")
     context_cols.remove("isbn")
+
+    # 텍스트 데이터는 idx화 안함
+    context_cols.remove("title_ft")
+    context_cols.remove("summary_ft")
 
     # 인덱싱 처리된 데이터 조인
     context_df = ratings.merge(users[user_cols], on="user_id", how="left").merge(
@@ -78,7 +84,14 @@ def dl_data_load(args):
 
     ######################## DATA LOAD
     users = pd.read_csv(args.DATA_PATH + "userspp.csv")
-    books = pd.read_csv(args.DATA_PATH + "bookspp.csv")
+    books = pd.read_csv(args.DATA_PATH + "bookspp_text.csv")
+    books["title_ft"] = books["title_ft"].apply(
+        lambda x: np.fromstring(x, dtype=np.float32, count=100)
+    )
+    books["summary_ft"] = books["summary_ft"].apply(
+        lambda x: np.fromstring(x, dtype=np.float32, count=100)
+    )
+
     train = pd.read_csv(args.DATA_PATH + "train_ppp.csv")
     test = pd.read_csv(args.DATA_PATH + "test_ratings.csv")
     sub = pd.read_csv(args.DATA_PATH + "sample_submission.csv")
@@ -107,11 +120,15 @@ def dl_data_load(args):
     for k, v in idx.items():
         field_dims_list.append(len(v))
 
+    # 텍스트 데이터 반영
+    # field_dims_list.append(100)
+    # field_dims_list.append(100)
+
     field_dims = np.array(field_dims_list, dtype=np.uint32)
 
     data = {
         "train": context_train,
-        "test": context_test.drop(["rating"], axis=1),
+        "test": context_test.drop("rating", axis=1),
         "field_dims": field_dims,
         "users": users,
         "books": books,
@@ -142,16 +159,75 @@ def dl_data_split(args, data):
     return data
 
 
+class Dl_Dataset(Dataset):
+    def __init__(
+        self, context_vector, title_vector, summary_vector, label=None, is_train=True
+    ):
+        self.context_vector = context_vector
+        self.title_vector = title_vector
+        self.summary_vector = summary_vector
+        self.train = is_train
+        if is_train:
+            self.label = label
+
+    def __len__(self):
+        return self.context_vector.shape[0]
+
+    def __getitem__(self, i):
+        if self.train:
+            return {
+                "context_vector": torch.tensor(
+                    self.context_vector[i], dtype=torch.long
+                ),
+                "title_vector": torch.tensor(self.title_vector[i], dtype=torch.float32),
+                "summary_vector": torch.tensor(
+                    self.summary_vector[i], dtype=torch.float32
+                ),
+                "label": torch.tensor(self.label[i], dtype=torch.float32),
+            }
+        else:
+            return {
+                "context_vector": torch.tensor(
+                    self.context_vector[i], dtype=torch.long
+                ),
+                "title_vector": torch.tensor(self.title_vector[i], dtype=torch.float32),
+                "summary_vector": torch.tensor(
+                    self.summary_vector[i], dtype=torch.float32
+                ),
+            }
+
+
 def dl_data_loader(args, data):
-    train_dataset = TensorDataset(
-        torch.LongTensor(data["X_train"].values),
-        torch.LongTensor(data["y_train"].values),
+
+    train_dataset = Dl_Dataset(
+        data["X_train"].drop(["title_ft", "summary_ft"], axis=1).values,
+        data["X_train"]["title_ft"].values,
+        data["X_train"]["summary_ft"].values,
+        data["y_train"].values,
     )
-    valid_dataset = TensorDataset(
-        torch.LongTensor(data["X_valid"].values),
-        torch.LongTensor(data["y_valid"].values),
+    valid_dataset = Dl_Dataset(
+        data["X_valid"].drop(["title_ft", "summary_ft"], axis=1).values,
+        data["X_valid"]["title_ft"].values,
+        data["X_valid"]["summary_ft"].values,
+        data["y_valid"].values,
     )
-    test_dataset = TensorDataset(torch.LongTensor(data["test"].values))
+    test_dataset = Dl_Dataset(
+        data["test"].drop(["title_ft", "summary_ft"], axis=1).values,
+        data["test"]["title_ft"].values,
+        data["test"]["summary_ft"].values,
+        is_train=False,
+    )
+
+    # train_dataset = TensorDataset(
+    #     torch.LongTensor(data["X_train"].drop(['title_ft', 'summary_ft'], axis=1).values),
+    #     torch.LongTensor(data["y_train"].values),
+    #     torch.LongTensor(data["X_train"]['title_ft'])
+    # )
+    # valid_dataset = TensorDataset(
+    #     torch.LongTensor(data["X_valid"].values),
+    #     torch.LongTensor(data["y_valid"].values),
+    # )
+    # test_dataset = TensorDataset(torch.LongTensor(data["test"].values))
 
     train_dataloader = DataLoader(
         train_dataset, batch_size=args.BATCH_SIZE, shuffle=args.DATA_SHUFFLE

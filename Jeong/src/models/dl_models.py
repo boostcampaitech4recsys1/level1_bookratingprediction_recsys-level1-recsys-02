@@ -60,8 +60,13 @@ class NeuralCollaborativeFiltering:
             self.model.train()
             total_loss = 0
             tk0 = tqdm.tqdm(self.train_dataloader, smoothing=0, mininterval=1.0)
-            for i, (fields, target) in enumerate(tk0):
-                fields, target = fields.to(self.device), target.to(self.device)
+            for i, data in enumerate(tk0):
+                fields, target = [
+                    data["context_vector"].to(self.device),
+                    data["title_vector"].to(self.device),
+                    data["summary_vector"].to(self.device),
+                ], data["label"].to(self.device)
+
                 y = self.model(fields)
                 loss = self.criterion(y, target.float())
                 self.model.zero_grad()
@@ -81,11 +86,11 @@ class NeuralCollaborativeFiltering:
             #     if len(past_rmse_score) > 3:
             #         break
 
-            if cur_rmse_score < past_rmse_score[-1]:  # 학습 되고 있다는 뜻
-                past_rmse_score = [cur_rmse_score]
-            else:  # valid loss가 증가. 학습 종료
-                past_rmse_score = [cur_rmse_score]
-                break
+            # if cur_rmse_score < past_rmse_score[-1]:  # 학습 되고 있다는 뜻
+            #     past_rmse_score = [cur_rmse_score]
+            # else:  # valid loss가 증가. 학습 종료
+            #     past_rmse_score = [cur_rmse_score]
+            #     break
         return_epoch = epoch
 
         # 학습이 끝난 후 validation set 학습
@@ -93,8 +98,13 @@ class NeuralCollaborativeFiltering:
             self.model.train()
             total_loss = 0
             tk0 = tqdm.tqdm(self.valid_dataloader, smoothing=0, mininterval=1.0)
-            for i, (fields, target) in enumerate(tk0):
-                fields, target = fields.to(self.device), target.to(self.device)
+            for i, data in enumerate(tk0):
+                fields, target = [
+                    data["context_vector"].to(self.device),
+                    data["title_vector"].to(self.device),
+                    data["summary_vector"].to(self.device),
+                ], data["label"].to(self.device)
+
                 y = self.model(fields)
                 loss = self.criterion(y, target.float())
                 self.model.zero_grad()
@@ -111,10 +121,13 @@ class NeuralCollaborativeFiltering:
         self.model.eval()
         targets, predicts = list(), list()
         with torch.no_grad():
-            for fields, target in tqdm.tqdm(
-                self.valid_dataloader, smoothing=0, mininterval=1.0
-            ):
-                fields, target = fields.to(self.device), target.to(self.device)
+            for data in tqdm.tqdm(self.valid_dataloader, smoothing=0, mininterval=1.0):
+                fields, target = [
+                    data["context_vector"].to(self.device),
+                    data["title_vector"].to(self.device),
+                    data["summary_vector"].to(self.device),
+                ], data["label"].to(self.device)
+
                 y = self.model(fields)
                 targets.extend(target.tolist())
                 predicts.extend(y.tolist())
@@ -124,8 +137,13 @@ class NeuralCollaborativeFiltering:
         self.model.eval()
         predicts = list()
         with torch.no_grad():
-            for fields in tqdm.tqdm(dataloader, smoothing=0, mininterval=1.0):
-                fields = fields[0].to(self.device)
+            for data in tqdm.tqdm(dataloader, smoothing=0, mininterval=1.0):
+                fields = [
+                    data["context_vector"].to(self.device),
+                    data["title_vector"].to(self.device),
+                    data["summary_vector"].to(self.device),
+                ]
+
                 y = self.model(fields)
                 predicts.extend(y.tolist())
         return predicts

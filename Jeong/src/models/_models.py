@@ -175,8 +175,9 @@ class _NeuralCollaborativeFiltering(nn.Module):
         self.item_field_idx = item_field_idx
         self.embedding = FeaturesEmbedding(field_dims, embed_dim)
         self.embed_output_dim = len(field_dims) * embed_dim
+        self.mlp_input_dim = self.embed_output_dim + 200
         self.mlp = MultiLayerPerceptron(
-            self.embed_output_dim, mlp_dims, dropout, output_layer=False
+            self.mlp_input_dim, mlp_dims, dropout, output_layer=False
         )
         self.fc = torch.nn.Linear(mlp_dims[-1] + embed_dim, 1)
 
@@ -184,11 +185,19 @@ class _NeuralCollaborativeFiltering(nn.Module):
         """
         :param x: Long tensor of size ``(batch_size, num_user_fields)``
         """
-        x = self.embedding(x)
+        context_vector, title_vector, summary_vector = x[0], x[1], x[2]
+
+        x = self.embedding(context_vector)
         user_x = x[:, self.user_field_idx].squeeze(1)
         item_x = x[:, self.item_field_idx].squeeze(1)
+
+        x = torch.cat(
+            [x.view(-1, self.embed_output_dim), title_vector, summary_vector], dim=1
+        )
+
+        x = self.mlp(x)
+
         gmf = user_x * item_x
-        x = self.mlp(x.view(-1, self.embed_output_dim))
         x = torch.cat([gmf, x], dim=1)
         x = self.fc(x).squeeze(1)
         return x
