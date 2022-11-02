@@ -124,7 +124,7 @@ def main(args):
     #         pass
     # print(count)
     ###############################################
-    now = time.localtime()s
+    now = time.localtime()
     now_date = time.strftime('%Y%m%d', now)
     now_hour = time.strftime('%X', now)
     save_time = now_date + '_' + now_hour.replace(':', '')

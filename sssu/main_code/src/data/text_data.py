@@ -13,15 +13,18 @@ from transformers import BertModel, BertTokenizer
 
 
 def text_preprocessing(summary):
-    summary = re.sub("[.,\'\"''""!?]", "", summary)
+    summary = re.sub("[.,\'\"''""!?:;\-]", "", summary)
     summary = re.sub("[^0-9a-zA-Z\\s]", " ", summary)
     summary = re.sub("\s+", " ", summary)
+    summary = summary.strip()
     summary = summary.lower()
     return summary
 
 
-def summary_merge(df, user_id, max_summary):
-    return " ".join(df[df['user_id'] == user_id].sort_values(by='summary_length', ascending=False)['summary'].values[:max_summary])
+def summary_merge(df, user_id, max_summary, train_df=None):
+    if train_df!=None:
+        df = pd.merge(df, train_df, how = 'left', on = 'isbn')
+    return " ".join(df[df['user_id'] == user_id].sort_values(by='rating', ascending=False)['summary'].values[:max_summary])
 
 
 def text_to_vector(text, tokenizer, model, device):
@@ -39,9 +42,10 @@ def text_to_vector(text, tokenizer, model, device):
     return sentence_embedding.cpu().detach().numpy()
 
 
-def process_text_data(df, books, user2idx, isbn2idx, device, train=False, user_summary_merge_vector=False, item_summary_vector=False):
+def process_text_data(args, df, books, user2idx, isbn2idx, device, train=False, user_summary_merge_vector=False, item_summary_vector=False):
     books_ = books.copy()
     books_['isbn'] = books_['isbn'].map(isbn2idx)
+    train_df = pd.read_csv(args.DATA_PATH + 'train_ratings.csv')
 
     if train == True:
         df_ = df.copy()
@@ -56,15 +60,20 @@ def process_text_data(df, books, user2idx, isbn2idx, device, train=False, user_s
     df_['summary'].replace({'':'None', ' ':'None'}, inplace=True)
     df_['summary_length'] = df_['summary'].apply(lambda x:len(x))
 
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-    model = BertModel.from_pretrained('bert-base-uncased').to(device)
+    tokenizer = BertTokenizer.from_pretrained('bert-base-multilingual-uncased')
+    model = BertModel.from_pretrained('bert-base-multilingual-uncased').to(device)
 
     if user_summary_merge_vector and item_summary_vector:
         print('Create User Summary Merge Vector')
         user_summary_merge_vector_list = []
-        for user in tqdm(df_['user_id'].unique()):
-            vector = text_to_vector(summary_merge(df_, user, 5), tokenizer, model, device)
-            user_summary_merge_vector_list.append(vector)
+        if train == True:
+            for user in tqdm(df_['user_id'].unique()):
+                vector = text_to_vector(summary_merge(df_, user, 5), tokenizer, model, device)
+                user_summary_merge_vector_list.append(vector)
+        else:
+            for user in tqdm(df_['user_id'].unique()):
+                vector = text_to_vector(summary_merge(df_, user, 5, train_df), tokenizer, model, device)
+                user_summary_merge_vector_list.append(vector)
         user_review_text_df = pd.DataFrame(df_['user_id'].unique(), columns=['user_id'])
         user_review_text_df['user_summary_merge_vector'] = user_summary_merge_vector_list
         vector = np.concatenate([
@@ -74,9 +83,9 @@ def process_text_data(df, books, user2idx, isbn2idx, device, train=False, user_s
         if not os.path.exists('./data/text_vector'):
             os.makedirs('./data/text_vector')
         if train == True:
-            np.save('./data/text_vector/train_user_summary_merge_vector.npy', vector)
+            np.save('./data/text_vector/train_user_summary_merge_vector_multilingual.npy', vector)
         else:
-            np.save('./data/text_vector/test_user_summary_merge_vector.npy', vector)
+            np.save('./data/text_vector/test_user_summary_merge_vector_multilingual.npy', vector)
 
         print('Create Item Summary Vector')
         item_summary_vector_list = []
@@ -94,24 +103,24 @@ def process_text_data(df, books, user2idx, isbn2idx, device, train=False, user_s
         if not os.path.exists('./data/text_vector'):
             os.makedirs('./data/text_vector')
         if train == True:
-            np.save('./data/text_vector/train_item_summary_vector.npy', vector)
+            np.save('./data/text_vector/train_item_summary_vector_multilingual.npy', vector)
         else:
-            np.save('./data/text_vector/test_item_summary_vector.npy', vector)
+            np.save('./data/text_vector/test_item_summary_vector_multilingual.npy', vector)
     else:
         print('Check Vectorizer')
         print('Vector Load')
         if train == True:
-            user = np.load('data/text_vector/train_user_summary_merge_vector.npy', allow_pickle=True)
+            user = np.load('data/text_vector/train_user_summary_merge_vector_multilingual.npy', allow_pickle=True)
         else:
-            user = np.load('data/text_vector/test_user_summary_merge_vector.npy', allow_pickle=True)
+            user = np.load('data/text_vector/test_user_summary_merge_vector_multilingual.npy', allow_pickle=True)
         user_review_text_df = pd.DataFrame([user[0], user[1]]).T
         user_review_text_df.columns = ['user_id', 'user_summary_merge_vector']
         user_review_text_df['user_id'] = user_review_text_df['user_id'].astype('int')
 
         if train == True:
-            item = np.load('data/text_vector/train_item_summary_vector.npy', allow_pickle=True)
+            item = np.load('data/text_vector/train_item_summary_vector_multilingual.npy', allow_pickle=True)
         else:
-            item = np.load('data/text_vector/test_item_summary_vector.npy', allow_pickle=True)
+            item = np.load('data/text_vector/test_item_summary_vector_multilingual.npy', allow_pickle=True)
         books_text_df = pd.DataFrame([item[0], item[1]]).T
         books_text_df.columns = ['isbn', 'item_summary_vector']
         books_text_df['isbn'] = books_text_df['isbn'].astype('int')
@@ -165,8 +174,8 @@ def text_data_load(args):
     train['isbn'] = train['isbn'].map(isbn2idx)
     sub['isbn'] = sub['isbn'].map(isbn2idx)
 
-    text_train = process_text_data(train, books, user2idx, isbn2idx, args.DEVICE, train=True, user_summary_merge_vector=args.DEEPCONN_VECTOR_CREATE, item_summary_vector=args.DEEPCONN_VECTOR_CREATE)
-    text_test = process_text_data(test, books, user2idx, isbn2idx, args.DEVICE, train=False, user_summary_merge_vector=args.DEEPCONN_VECTOR_CREATE, item_summary_vector=args.DEEPCONN_VECTOR_CREATE)
+    text_train = process_text_data(args, train, books, user2idx, isbn2idx, args.DEVICE, train=True, user_summary_merge_vector=args.DEEPCONN_VECTOR_CREATE, item_summary_vector=args.DEEPCONN_VECTOR_CREATE)
+    text_test = process_text_data(args, test, books, user2idx, isbn2idx, args.DEVICE, train=False, user_summary_merge_vector=args.DEEPCONN_VECTOR_CREATE, item_summary_vector=args.DEEPCONN_VECTOR_CREATE)
 
     data = {
             'train':train,

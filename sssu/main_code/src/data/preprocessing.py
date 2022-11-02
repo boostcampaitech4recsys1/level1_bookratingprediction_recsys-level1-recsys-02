@@ -544,6 +544,7 @@ def book_publisher_preprocessing_func(books: pd.DataFrame) -> pd.DataFrame:
             ] = right_publisher
         except:
             pass
+    return books
 
 
 def book_language_preprocessing_func(books: pd.DataFrame) -> pd.DataFrame:
