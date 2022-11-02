@@ -98,7 +98,7 @@ def context_data_load(args):
     ######################## DATA LOAD
     users = pd.read_csv(args.DATA_PATH + 'users_1102.csv')
     books = pd.read_csv(args.DATA_PATH + 'books_1102.csv')
-    train = pd.read_csv(args.DATA_PATH + 'train_ratings.csv')
+    train = pd.read_csv(args.DATA_PATH + 'train_1102.csv')
     test = pd.read_csv(args.DATA_PATH + 'test_ratings.csv')
     sub = pd.read_csv(args.DATA_PATH + 'sample_submission.csv')
 
@@ -114,7 +114,7 @@ def context_data_load(args):
     user2idx = {id:idx for idx, id in idx2user.items()}
     isbn2idx = {isbn:idx for idx, isbn in idx2isbn.items()}
 
-    train_mean_rating, user2rating, isbn2rating = calc_mean_rating(train)
+    # train_mean_rating, user2rating, isbn2rating = calc_mean_rating(train)
 
     train['user_id'] = train['user_id'].map(user2idx)
     sub['user_id'] = sub['user_id'].map(user2idx)
@@ -142,11 +142,11 @@ def context_data_load(args):
             'idx2isbn':idx2isbn,
             'user2idx':user2idx,
             'isbn2idx':isbn2idx,
-            "isbn2rating": isbn2rating,
-            "user2rating": user2rating,
-            "train_mean_rating": train_mean_rating,
-            'unique_user_ids': unique_user_ids,
-            'unique_isbns': unique_isbns
+            #"isbn2rating": isbn2rating,
+            #"user2rating": user2rating,
+            #"train_mean_rating": train_mean_rating,
+            #'unique_user_ids': unique_user_ids,
+            #'unique_isbns': unique_isbns
             }
 
 

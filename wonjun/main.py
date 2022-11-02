@@ -97,7 +97,8 @@ def main(args):
         pass
 
     ######################### RULE-BASED
-    submission = rule_base(submission, data)
+    
+    #submission = rule_base(submission, data)
 
     now = time.localtime()
     now_date = time.strftime('%Y%m%d', now)
