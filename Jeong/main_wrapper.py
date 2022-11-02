@@ -2,16 +2,14 @@ import itertools
 import pandas as pd
 import main
 import argparse
+from tqdm import tqdm
 
 args_dict = {
     "MODEL": ["NCF"],
-    "EPOCHS": [3],
-    "TEST_SIZE": [0.3],
-    "BATCH_SIZE": [512, 1024],
-    "LR": [0.001],
-    "NCF_EMBED_DIM": [16],
-    "NCF_MLP_DIMS": [(16, 16)],
-    "NCF_DROPOUT": [0.2, 0.1],
+    "BATCH_SIZE": [1024],
+    "NCF_EMBED_DIM": [8],
+    "NCF_MLP_DIMS": [(32, 18, 12, 5)],
+    "NCF_DROPOUT": [0.1],
 }
 
 
@@ -57,7 +55,7 @@ for idx, x in enumerate(itertools.product(*args_dict.values())):
 
     ############### TRAINING OPTION
     arg("--BATCH_SIZE", type=int, default=1024, help="Batch size를 조정할 수 있습니다.")
-    arg("--EPOCHS", type=int, default=1, help="Epoch 수를 조정할 수 있습니다.")
+    arg("--EPOCHS", type=int, default=50, help="Epoch 수를 조정할 수 있습니다.")
     arg("--LR", type=float, default=1e-3, help="Learning Rate를 조정할 수 있습니다.")
     arg(
         "--WEIGHT_DECAY",

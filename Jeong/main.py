@@ -28,8 +28,7 @@ def main(args):
     if args.MODEL in ("FM", "FFM"):
         data = context_data_load(args)
     elif args.MODEL in ("NCF", "WDN", "DCN"):
-        # data = dl_data_load(args)
-        data = context_data_load(args)
+        data = dl_data_load(args)
     elif args.MODEL == "CNN_FM":
         data = image_data_load(args)
     elif args.MODEL == "DeepCoNN":
@@ -50,9 +49,9 @@ def main(args):
 
     elif args.MODEL in ("NCF", "WDN", "DCN"):
         # data = dl_data_split(args, data)
-        data = context_data_split(args, data)
+        data = dl_data_split(args, data)
         # data = dl_data_loader(args, data)
-        data = context_data_loader(args, data)
+        data = dl_data_loader(args, data)
 
     elif args.MODEL == "CNN_FM":
         data = image_data_split(args, data)
@@ -91,7 +90,7 @@ def main(args):
 
     ######################## TRAIN
     print(f"--------------- {model_info} TRAINING ---------------")
-    valid_loss = model.train()
+    valid_loss, return_epoch = model.train()
 
     ######################## INFERENCE
     print(f"--------------- {model_info} PREDICT ---------------")
@@ -131,10 +130,12 @@ def main(args):
     now_hour = time.strftime("%X", now)
     save_time = now_date + "_" + now_hour.replace(":", "")
     # submission.to_csv("submit/{}_{}.csv".format(save_time, args.MODEL), index=False)
-    filename = f"submit/LOSS_{valid_loss}__{model_info}.csv"
+    filename = (
+        f"submit/LOSS_{round(valid_loss, 3)}__EPOCHS_{return_epoch}__{model_info}.csv"
+    )
     submission.to_csv(filename, index=False)
 
-    return valid_loss
+    return valid_loss, return_epoch
 
 
 if __name__ == "__main__":

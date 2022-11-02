@@ -15,7 +15,7 @@ def process_dl_data(
     ratings = pd.concat([rating_train, rating_test]).reset_index(drop=True)
 
     # user에서 활용할 데이터 목록
-    user_cols = ["user_id", "age", "location_state", "location_country"]
+    user_cols = ["user_id", "location_country"]
 
     # book에서 활용할 데이터 목록
     book_cols = [
@@ -77,9 +77,9 @@ def process_dl_data(
 def dl_data_load(args):
 
     ######################## DATA LOAD
-    users = pd.read_csv(args.DATA_PATH + "users.csv")
-    books = pd.read_csv(args.DATA_PATH + "books.csv")
-    train = pd.read_csv(args.DATA_PATH + "train_ratings.csv")
+    users = pd.read_csv(args.DATA_PATH + "userspp.csv")
+    books = pd.read_csv(args.DATA_PATH + "bookspp.csv")
+    train = pd.read_csv(args.DATA_PATH + "train_ppp.csv")
     test = pd.read_csv(args.DATA_PATH + "test_ratings.csv")
     sub = pd.read_csv(args.DATA_PATH + "sample_submission.csv")
 
