@@ -20,6 +20,21 @@ def age_map(x: int) -> int:
     else:
         return 6
 
+def calc_mean_rating(train: pd.DataFrame):
+    train_mean_rating = train["rating"].mode()[0]
+
+    # user2rating = train.groupby('user_id')['rating'].mode()[0]
+    user2rating = train.groupby('user_id')['rating'].apply(lambda x:x.value_counts().index[0])
+
+    user2rating = user2rating.to_dict()
+
+    #isbn2rating = train.groupby('isbn')['rating'].mode()[0]
+    isbn2rating = train.groupby('isbn')['rating'].apply(lambda x:x.value_counts().index[0])
+    isbn2rating = isbn2rating.to_dict()
+
+    return train_mean_rating, user2rating, isbn2rating
+
+
 def process_context_data(users, books, ratings1, ratings2):
     #users['location_city'] = users['location'].apply(lambda x: x.split(',')[0])
     #users['location_state'] = users['location'].apply(lambda x: x.split(',')[1])
@@ -83,9 +98,12 @@ def context_data_load(args):
     ######################## DATA LOAD
     users = pd.read_csv(args.DATA_PATH + 'users_1102.csv')
     books = pd.read_csv(args.DATA_PATH + 'books_1102.csv')
-    train = pd.read_csv(args.DATA_PATH + 'train_ppp.csv')
+    train = pd.read_csv(args.DATA_PATH + 'train_ratings.csv')
     test = pd.read_csv(args.DATA_PATH + 'test_ratings.csv')
     sub = pd.read_csv(args.DATA_PATH + 'sample_submission.csv')
+
+    unique_user_ids = train["user_id"].unique()
+    unique_isbns = train["isbn"].unique()
 
     ids = pd.concat([train['user_id'], sub['user_id']]).unique()
     isbns = pd.concat([train['isbn'], sub['isbn']]).unique()
@@ -95,6 +113,8 @@ def context_data_load(args):
 
     user2idx = {id:idx for idx, id in idx2user.items()}
     isbn2idx = {isbn:idx for idx, isbn in idx2isbn.items()}
+
+    train_mean_rating, user2rating, isbn2rating = calc_mean_rating(train)
 
     train['user_id'] = train['user_id'].map(user2idx)
     sub['user_id'] = sub['user_id'].map(user2idx)
@@ -122,6 +142,11 @@ def context_data_load(args):
             'idx2isbn':idx2isbn,
             'user2idx':user2idx,
             'isbn2idx':isbn2idx,
+            "isbn2rating": isbn2rating,
+            "user2rating": user2rating,
+            "train_mean_rating": train_mean_rating,
+            'unique_user_ids': unique_user_ids,
+            'unique_isbns': unique_isbns
             }
 
 

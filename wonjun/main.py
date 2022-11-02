@@ -13,6 +13,7 @@ from src import FactorizationMachineModel, FieldAwareFactorizationMachineModel
 from src import NeuralCollaborativeFiltering, WideAndDeepModel, DeepCrossNetworkModel
 from src import CNN_FM
 from src import DeepCoNN
+from src.data import rule_base
 
 
 def main(args):
@@ -23,7 +24,7 @@ def main(args):
     if args.MODEL in ('FM', 'FFM'):
         data = context_data_load(args)
     elif args.MODEL in ('NCF', 'WDN', 'DCN'):
-        data = dl_data_load(args)
+        data = context_data_load(args)
     elif args.MODEL == 'CNN_FM':
         data = image_data_load(args)
     elif args.MODEL == 'DeepCoNN':
@@ -40,8 +41,8 @@ def main(args):
         data = context_data_loader(args, data)
 
     elif args.MODEL in ('NCF', 'WDN', 'DCN'):
-        data = dl_data_split(args, data)
-        data = dl_data_loader(args, data)
+        data = context_data_split(args, data)
+        data = context_data_loader(args, data)
 
     elif args.MODEL=='CNN_FM':
         data = image_data_split(args, data)
@@ -95,13 +96,15 @@ def main(args):
     else:
         pass
 
+    ######################### RULE-BASED
+    submission = rule_base(submission, data)
+
     now = time.localtime()
     now_date = time.strftime('%Y%m%d', now)
     now_hour = time.strftime('%X', now)
     save_time = now_date + '_' + now_hour.replace(':', '')
     submission.to_csv('submit/{}_{}.csv'.format(save_time, args.MODEL), index=False)
 
-    ######################### RULE-BASED
     
 
 
@@ -137,7 +140,7 @@ if __name__ == "__main__":
 
     ############### NCF
     arg('--NCF_EMBED_DIM', type=int, default=16, help='NCF에서 embedding시킬 차원을 조정할 수 있습니다.')
-    arg('--NCF_MLP_DIMS', type=list, default=(16, 16), help='NCF에서 MLP Network의 차원을 조정할 수 있습니다.')
+    arg('--NCF_MLP_DIMS', type=list, default=(256, 128, 128, 64, 16), help='NCF에서 MLP Network의 차원을 조정할 수 있습니다.')
     arg('--NCF_DROPOUT', type=float, default=0.2, help='NCF에서 Dropout rate를 조정할 수 있습니다.')
 
     ############### WDN
