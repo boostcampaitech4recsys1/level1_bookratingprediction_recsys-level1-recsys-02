@@ -23,6 +23,7 @@ class CNN_Base(nn.Module):
         x = x.view(-1, 12 * 4 * 4)
         return x
 
+
 class _CNN_FM(torch.nn.Module):
     def __init__(self, field_dims, embed_dim, latent_dim):
         super().__init__()
@@ -44,6 +45,7 @@ class _CNN_FM(torch.nn.Module):
         output = self.fm(feature_vector)
         return output.squeeze(1)
 
+
 class CNN_FM:
     def __init__(self, args, data):
         super().__init__()
@@ -53,7 +55,7 @@ class CNN_FM:
                             args.CNN_FM_EMBED_DIM,
                             args.CNN_FM_LATENT_DIM
                             ).to(self.device)
-        self.optimizer =  torch.optim.Adam(self.model.parameters(), lr=args.LR)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=args.LR)
         self.train_data_loader = data['train_dataloader']
         self.valid_data_loader = data['valid_dataloader']
         self.criterion = RMSELoss()
