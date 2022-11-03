@@ -125,7 +125,7 @@ if __name__ == "__main__":
     arg('--SEED', type=int, default=42, help='seed 값을 조정할 수 있습니다.')
     
     ############### TRAINING OPTION
-    arg('--BATCH_SIZE', type=int, default=64, help='Batch size를 조정할 수 있습니다.')
+    arg('--BATCH_SIZE', type=int, default=128, help='Batch size를 조정할 수 있습니다.')
     arg('--EPOCHS', type=int, default=10, help='Epoch 수를 조정할 수 있습니다.')
     arg('--LR', type=float, default=1e-3, help='Learning Rate를 조정할 수 있습니다.')
     arg('--WEIGHT_DECAY', type=float, default=1e-6, help='Adam optimizer에서 정규화에 사용하는 값을 조정할 수 있습니다.')
@@ -134,10 +134,10 @@ if __name__ == "__main__":
     arg('--DEVICE', type=str, default='cuda', choices=['cuda', 'cpu'], help='학습에 사용할 Device를 조정할 수 있습니다.')
 
     ############### FM
-    arg('--FM_EMBED_DIM', type=int, default=16, help='FM에서 embedding시킬 차원을 조정할 수 있습니다.')
+    arg('--FM_EMBED_DIM', type=int, default=64, help='FM에서 embedding시킬 차원을 조정할 수 있습니다.')
 
     ############### FFM
-    arg('--FFM_EMBED_DIM', type=int, default=16, help='FFM에서 embedding시킬 차원을 조정할 수 있습니다.')
+    arg('--FFM_EMBED_DIM', type=int, default=32, help='FFM에서 embedding시킬 차원을 조정할 수 있습니다.')
 
     ############### NCF
     arg('--NCF_EMBED_DIM', type=int, default=16, help='NCF에서 embedding시킬 차원을 조정할 수 있습니다.')

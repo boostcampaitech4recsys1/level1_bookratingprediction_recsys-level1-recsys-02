@@ -129,6 +129,8 @@ class WideAndDeepModel:
 
             rmse_score = self.predict_train()
             print('epoch:', epoch, 'validation: rmse:', rmse_score)
+            
+        # return rmse_score, epoch
 
 
     def predict_train(self):
