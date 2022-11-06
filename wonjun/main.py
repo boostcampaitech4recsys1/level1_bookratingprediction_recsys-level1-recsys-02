@@ -126,8 +126,8 @@ if __name__ == "__main__":
     
     ############### TRAINING OPTION
     arg('--BATCH_SIZE', type=int, default=128, help='Batch size를 조정할 수 있습니다.')
-    arg('--EPOCHS', type=int, default=10, help='Epoch 수를 조정할 수 있습니다.')
-    arg('--LR', type=float, default=1e-3, help='Learning Rate를 조정할 수 있습니다.')
+    arg('--EPOCHS', type=int, default=1, help='Epoch 수를 조정할 수 있습니다.')
+    arg('--LR', type=float, default=0.001, help='Learning Rate를 조정할 수 있습니다.')
     arg('--WEIGHT_DECAY', type=float, default=1e-6, help='Adam optimizer에서 정규화에 사용하는 값을 조정할 수 있습니다.')
 
     ############### GPU
@@ -140,14 +140,14 @@ if __name__ == "__main__":
     arg('--FFM_EMBED_DIM', type=int, default=32, help='FFM에서 embedding시킬 차원을 조정할 수 있습니다.')
 
     ############### NCF
-    arg('--NCF_EMBED_DIM', type=int, default=16, help='NCF에서 embedding시킬 차원을 조정할 수 있습니다.')
-    arg('--NCF_MLP_DIMS', type=list, default=(256, 128, 128, 64, 16), help='NCF에서 MLP Network의 차원을 조정할 수 있습니다.')
-    arg('--NCF_DROPOUT', type=float, default=0.2, help='NCF에서 Dropout rate를 조정할 수 있습니다.')
+    arg('--NCF_EMBED_DIM', type=int, default=484, help='NCF에서 embedding시킬 차원을 조정할 수 있습니다.')
+    arg('--NCF_MLP_DIMS', type=list, default=(256, 128, 128, 64), help='NCF에서 MLP Network의 차원을 조정할 수 있습니다.')
+    arg('--NCF_DROPOUT', type=float, default=0.1, help='NCF에서 Dropout rate를 조정할 수 있습니다.')
 
     ############### WDN
-    arg('--WDN_EMBED_DIM', type=int, default=16, help='WDN에서 embedding시킬 차원을 조정할 수 있습니다.')
-    arg('--WDN_MLP_DIMS', type=list, default=(16, 16), help='WDN에서 MLP Network의 차원을 조정할 수 있습니다.')
-    arg('--WDN_DROPOUT', type=float, default=0.2, help='WDN에서 Dropout rate를 조정할 수 있습니다.')
+    arg('--WDN_EMBED_DIM', type=int, default=112, help='WDN에서 embedding시킬 차원을 조정할 수 있습니다.')
+    arg('--WDN_MLP_DIMS', type=list, default=(128, 128, 64, 32), help='WDN에서 MLP Network의 차원을 조정할 수 있습니다.')
+    arg('--WDN_DROPOUT', type=float, default=0.1, help='WDN에서 Dropout rate를 조정할 수 있습니다.')
 
     ############### DCN
     arg('--DCN_EMBED_DIM', type=int, default=16, help='DCN에서 embedding시킬 차원을 조정할 수 있습니다.')
