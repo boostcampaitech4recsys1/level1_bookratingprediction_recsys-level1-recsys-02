@@ -6,66 +6,90 @@ import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader, Dataset
 
 
-def process_context_data(users, books, rating_train, rating_test):
+def age_map(x: int) -> int:
+    x = int(x)
+    if x < 20:
+        return 1
+    elif x >= 20 and x < 30:
+        return 2
+    elif x >= 30 and x < 40:
+        return 3
+    elif x >= 40 and x < 50:
+        return 4
+    elif x >= 50 and x < 60:
+        return 5
+    else:
+        return 6
 
-    ratings = pd.concat([rating_train, rating_test]).reset_index(drop=True)
 
-    # user에서 활용할 데이터 목록
-    user_cols = ["user_id", "location_country"]
+def process_context_data(users, books, ratings1, ratings2):
+    # users['location_city'] = users['location'].apply(lambda x: x.split(',')[0])
+    # users['location_state'] = users['location'].apply(lambda x: x.split(',')[1])
+    # users['location_country'] = users['location'].apply(lambda x: x.split(',')[2])
+    # users = users.drop(['location'], axis=1)
 
-    # book에서 활용할 데이터 목록
-    book_cols = [
-        "isbn",
-        "book_author",
-        "year_of_publication",
-        "publisher",
-        "category_high",
-        "isbn_country",
-    ]
-
-    # 활용할 context 목록
-    context_cols = user_cols.copy()
-    context_cols.extend(book_cols)
-    context_cols.remove("user_id")
-    context_cols.remove("isbn")
+    ratings = pd.concat([ratings1, ratings2]).reset_index(drop=True)
 
     # 인덱싱 처리된 데이터 조인
-    context_df = ratings.merge(users[user_cols], on="user_id", how="left").merge(
-        books[book_cols],
+    context_df = ratings.merge(users, on="user_id", how="left").merge(
+        books[["isbn", "category_high", "publisher", "isbn_country", "book_author"]],
         on="isbn",
         how="left",
     )
-    train_df = rating_train.merge(users[user_cols], on="user_id", how="left").merge(
-        books[book_cols],
+    train_df = ratings1.merge(users, on="user_id", how="left").merge(
+        books[["isbn", "category_high", "publisher", "isbn_country", "book_author"]],
         on="isbn",
         how="left",
     )
-    test_df = rating_test.merge(users[user_cols], on="user_id", how="left").merge(
-        books[book_cols],
+    test_df = ratings2.merge(users, on="user_id", how="left").merge(
+        books[["isbn", "category_high", "publisher", "isbn_country", "book_author"]],
         on="isbn",
         how="left",
     )
 
-    def col2idx(
-        context_df: pd.DataFrame,
-        col: str,
-        train_df: pd.DataFrame,
-        test_df: pd.DataFrame,
-    ):
-        """
-        context df의 col에 대해서 idx화 해주기.
-        """
-        idx_dict = {v: k for k, v in enumerate(context_df[col].unique())}
-        train_df[col] = train_df[col].map(idx_dict)
-        test_df[col] = test_df[col].map(idx_dict)
-        return idx_dict, train_df, test_df
-
-    idx = dict()
     # 인덱싱 처리
-    for col in context_cols:
-        idx[f"{col}2idx"], train_df, test_df = col2idx(
-            context_df, col, train_df, test_df
-        )
+    # loc_city2idx = {v:k for k,v in enumerate(context_df['location_city'].unique())}
+    # loc_state2idx = {v:k for k,v in enumerate(context_df['location_state'].unique())}
+    loc_country2idx = {
+        v: k for k, v in enumerate(context_df["location_country"].unique())
+    }
+
+    # train_df['location_city'] = train_df['location_city'].map(loc_city2idx)
+    # train_df['location_state'] = train_df['location_state'].map(loc_state2idx)
+    train_df["location_country"] = train_df["location_country"].map(loc_country2idx)
+    # test_df['location_city'] = test_df['location_city'].map(loc_city2idx)
+    # test_df['location_state'] = test_df['location_state'].map(loc_state2idx)
+    test_df["location_country"] = test_df["location_country"].map(loc_country2idx)
+
+    # train_df['age'] = train_df['age'].dropna(axis=0)
+    # train_df['age'] = train_df['age'].apply(age_map)
+    # test_df['age'] = test_df['age'].dropna(axis=0)
+    # test_df['age'] = test_df['age'].apply(age_map)
+
+    # book 파트 인덱싱
+    category2idx = {v: k for k, v in enumerate(context_df["category_high"].unique())}
+    publisher2idx = {v: k for k, v in enumerate(context_df["publisher"].unique())}
+    language2idx = {v: k for k, v in enumerate(context_df["isbn_country"].unique())}
+    author2idx = {v: k for k, v in enumerate(context_df["book_author"].unique())}
+
+    train_df["category_high"] = train_df["category_high"].map(category2idx)
+    train_df["publisher"] = train_df["publisher"].map(publisher2idx)
+    train_df["isbn_country"] = train_df["isbn_country"].map(language2idx)
+    train_df["book_author"] = train_df["book_author"].map(author2idx)
+    test_df["category_high"] = test_df["category_high"].map(category2idx)
+    test_df["publisher"] = test_df["publisher"].map(publisher2idx)
+    test_df["isbn_country"] = test_df["isbn_country"].map(language2idx)
+    test_df["book_author"] = test_df["book_author"].map(author2idx)
+
+    idx = {
+        # "loc_city2idx":loc_city2idx,
+        # "loc_state2idx":loc_state2idx,
+        "loc_country2idx": loc_country2idx,
+        "category2idx": category2idx,
+        "publisher2idx": publisher2idx,
+        "language2idx": language2idx,
+        "author2idx": author2idx,
+    }
 
     return idx, train_df, test_df
 
@@ -172,4 +196,4 @@ def context_data_loader(args, data):
         test_dataloader,
     )
 
-    return data
+    return
