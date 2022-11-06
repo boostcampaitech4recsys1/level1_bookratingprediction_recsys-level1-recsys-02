@@ -1,7 +1,6 @@
 ### Dataset
 */data/
 sssu/main_code/data/
-​
 
 ### model parameter
 */models/
@@ -92,6 +91,11 @@ venv.bak/
 .idea/
 
 # Submit
+*/submit
+
+# models
+*/models
+=======
 *.csv
 
 ### catboost
