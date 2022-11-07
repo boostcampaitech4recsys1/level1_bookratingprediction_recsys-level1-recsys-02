@@ -44,7 +44,7 @@ transformers==4.23.1
 - [CatBoost](https://github.com/catboost/catboost)
 - [Factorization Machine](https://ieeexplore.ieee.org/document/5694074)
 - [Field-aware Factorization Machines](https://www.csie.ntu.edu.tw/~cjlin/papers/ffm.pdf)
-- [Neural Collaborotaive Filtering]("https://arxiv.org/abs/1708.05031")
+- [Neural Collaborotaive Filtering](https://arxiv.org/abs/1708.05031)
 - [DeepCoNN](https://arxiv.org/abs/1701.04783)
 
 # Contributors
