@@ -37,8 +37,6 @@ tqdm==4.51.0
 transformers==4.23.1
 ```
 
-# Example to Run the Codes
-
 # Reference
 
 - [CatBoost](https://github.com/catboost/catboost)
