@@ -1,13 +1,10 @@
 ### Dataset
-*/data/
-sssu/main_code/data/
+./data/
 ​
 
 ### model parameter
-*/models/
+./models/
 
-### tuning result
-*/tuning_result/
 
 # macOS + Windows
 .DS_Store
@@ -93,6 +90,3 @@ venv.bak/
 
 # Submit
 *.csv
-
-### catboost
-*/catboost_info/
