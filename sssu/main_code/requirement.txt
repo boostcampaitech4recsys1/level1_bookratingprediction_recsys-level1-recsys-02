@@ -1,8 +1,0 @@
-pandas
-scikit-learn
-nltk
-transformers
-
-gemsim
-scipy.stats
-nltk
