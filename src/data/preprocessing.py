@@ -25,13 +25,15 @@ class Dataset:
         self.preprocess_location()
         self.preprocess_age()
 
-    def preprocess_books(self):
+    def preprocess_books(
+        self, drops=["book_title", "img_url", "language", "summary", "img_path"]
+    ):
         self.preprocess_author()
         self.preprocess_year()
         self.preprocess_publisher()
         self.preprocess_language()
         self.preprocess_category()
-        self.drop_book_columns()
+        self.drop_book_columns(drops)
 
     def preprocess_ratings(self):
         user_count = (
@@ -192,9 +194,7 @@ class Dataset:
 
     # book
 
-    def drop_book_columns(
-        self, columns=["book_title", "img_url", "language", "summary", "img_path"]
-    ):
+    def drop_book_columns(self, columns):
         self.books = self.books.drop(columns, axis=1)
 
     def preprocess_author(self):
